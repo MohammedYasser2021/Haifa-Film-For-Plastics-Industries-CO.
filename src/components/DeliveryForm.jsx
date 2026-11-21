@@ -1,0 +1,108 @@
+import React, { useState } from "react";
+import { Plus, Trash2, Lock } from "lucide-react";
+import { useI18n } from "../lib/i18n";
+import { COLORS, LOGOS, VISCOSITIES, CURRENCIES, SUPPLIER, emptyItem, itemSqm, itemTotal, totals, plain, money, num } from "../lib/utils";
+
+const base = "w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition placeholder:text-slate-300 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100";
+
+// NOTE: these are defined OUTSIDE the form component so they keep their identity between renders (fixes the focus-loss bug)
+function Field({ label, children, className = "" }) {
+  return <label className={`block ${className}`}><span className="mb-1 block text-xs font-medium text-slate-500">{label}</span>{children}</label>;
+}
+function Select({ value, options, onChange }) {
+  return <select className={base} value={value} onChange={(e) => onChange(e.target.value)}>{options.map((o) => <option key={o}>{o}</option>)}</select>;
+}
+function NumInput({ value, onChange, suffix, placeholder }) {
+  return (
+    <div className="relative">
+      <input type="number" min="0" step="any" inputMode="decimal" className={`${base} ${suffix ? "pr-12" : ""}`} value={value} placeholder={placeholder}
+        onWheel={(e) => e.currentTarget.blur()} onChange={(e) => onChange(e.target.value)} />
+      {suffix && <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-xs text-slate-400">{suffix}</span>}
+    </div>
+  );
+}
+
+export default function DeliveryForm({ initial, onSave, onCancel }) {
+  const { t } = useI18n();
+  const [d, setD] = useState(() => structuredClone(initial));
+  const [err, setErr] = useState(false);
+  const T = totals(d);
+  const up = (k, v) => setD((p) => ({ ...p, [k]: v }));
+  const upItem = (id, k, v) => setD((p) => ({ ...p, items: p.items.map((i) => (i.id === id ? { ...i, [k]: v } : i)) }));
+  const delItem = (id) => setD((p) => ({ ...p, items: p.items.filter((i) => i.id !== id) }));
+  const addItem = () => setD((p) => {
+    const l = p.items.at(-1);
+    return { ...p, items: [...p.items, { ...emptyItem(), ...(l && { color: l.color, logo: l.logo, viscosity: l.viscosity, thickness: l.thickness, price: l.price }) }] };
+  });
+  const submit = () => {
+    const ok = d.buyer.trim() && d.orderNo.trim() && d.items.length && d.items.every((i) => num(i.width) && num(i.length) && num(i.qty));
+    if (!ok) return setErr(true);
+    onSave({ ...d, buyer: d.buyer.trim(), orderNo: d.orderNo.trim().toUpperCase() });
+  };
+
+  return (
+    <>
+      <div className="min-h-0 flex-1 space-y-6 overflow-y-auto bg-slate-50/60 px-6 py-5">
+        <section className="rounded-xl border border-slate-200 bg-white p-4">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <Field label={t("supplier")} className="lg:col-span-2">
+              <div className="relative"><input className={`${base} bg-slate-100 pr-9 text-slate-500`} value={SUPPLIER} disabled /><Lock size={14} className="absolute right-3 top-3 text-slate-400" /></div>
+            </Field>
+            <Field label={t("date")}><input type="date" className={base} value={d.date} onChange={(e) => up("date", e.target.value)} /></Field>
+            <Field label={t("currency")}><Select value={d.currency} options={CURRENCIES} onChange={(v) => up("currency", v)} /></Field>
+            <Field label={t("buyer")} className="lg:col-span-2"><input className={base} value={d.buyer} onChange={(e) => up("buyer", e.target.value)} placeholder="AWAAD" /></Field>
+            <Field label={t("orderNo")} className="lg:col-span-2"><input className={`${base} font-mono tracking-wide`} value={d.orderNo} onChange={(e) => up("orderNo", e.target.value.toUpperCase())} placeholder="HFTBB20261101" /></Field>
+          </div>
+          <p className="mt-2 text-xs text-slate-400">{t("orderHint")}</p>
+        </section>
+
+        <section className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-slate-700">{t("rows")}</h3>
+            <button onClick={addItem} className="flex items-center gap-1 rounded-lg bg-indigo-50 px-3 py-1.5 text-sm font-medium text-indigo-700 transition hover:bg-indigo-100"><Plus size={16} />{t("addRow")}</button>
+          </div>
+          {d.items.map((i, idx) => (
+            <div key={i.id} className="rounded-xl border border-slate-200 bg-white p-4">
+              <div className="mb-3 flex items-center justify-between">
+                <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">{t("item")} {idx + 1}</span>
+                {d.items.length > 1 && <button onClick={() => delItem(i.id)} className="rounded p-1 text-slate-400 hover:bg-red-50 hover:text-red-600"><Trash2 size={16} /></button>}
+              </div>
+              <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+                <Field label={t("color")}><Select value={i.color} options={COLORS} onChange={(v) => upItem(i.id, "color", v)} /></Field>
+                <Field label={t("logo")}><Select value={i.logo} options={LOGOS} onChange={(v) => upItem(i.id, "logo", v)} /></Field>
+                <Field label={t("viscosity")}><Select value={i.viscosity} options={VISCOSITIES} onChange={(v) => upItem(i.id, "viscosity", v)} /></Field>
+                <Field label={t("thickness")}><NumInput value={i.thickness} suffix="mic" placeholder="35" onChange={(v) => upItem(i.id, "thickness", v)} /></Field>
+                <Field label={t("width")}><NumInput value={i.width} suffix="m" onChange={(v) => upItem(i.id, "width", v)} /></Field>
+                <Field label={t("length")}><NumInput value={i.length} suffix="m" onChange={(v) => upItem(i.id, "length", v)} /></Field>
+                <Field label={t("qty")}><NumInput value={i.qty} suffix="roll" onChange={(v) => upItem(i.id, "qty", v)} /></Field>
+                <Field label={t("price")}><NumInput value={i.price} suffix={d.currency} onChange={(v) => upItem(i.id, "price", v)} /></Field>
+              </div>
+              <div className="mt-3 flex justify-end gap-6 border-t border-slate-100 pt-3 text-sm">
+                <span className="text-slate-500">{t("sqm")}: <b className="text-slate-800">{plain(itemSqm(i))}</b></span>
+                <span className="text-slate-500">{t("total")}: <b className="text-slate-800">{d.currency} {money(itemTotal(i))}</b></span>
+              </div>
+            </div>
+          ))}
+        </section>
+
+        <section className="grid gap-4 rounded-xl border border-slate-200 bg-white p-4 md:grid-cols-2">
+          <Field label={t("notes")}><textarea rows={3} className={base} value={d.notes} onChange={(e) => up("notes", e.target.value)} /></Field>
+          <Field label={t("receiver")}><input className={base} value={d.receiver} onChange={(e) => up("receiver", e.target.value)} /></Field>
+        </section>
+      </div>
+
+      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 bg-white px-6 py-4">
+        <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm">
+          <span className="text-slate-500">{t("qty")}: <b className="text-slate-900">{plain(T.qty)}</b></span>
+          <span className="text-slate-500">{t("sqm")}: <b className="text-slate-900">{plain(T.sqm)}</b></span>
+          <span className="text-slate-500">{t("total")}: <b className="text-red-700">{d.currency} {money(T.total, 3)}</b></span>
+        </div>
+        <div className="flex items-center gap-2">
+          {err && <span className="mr-2 text-sm text-red-600">{t("required")}</span>}
+          <button onClick={onCancel} className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50">{t("cancel")}</button>
+          <button onClick={submit} className="rounded-lg bg-indigo-600 px-5 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700">{t("save")}</button>
+        </div>
+      </div>
+    </>
+  );
+}
