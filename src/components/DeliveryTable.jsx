@@ -30,7 +30,7 @@ export default function DeliveryTable({ list, onView, onEdit, onDelete, onExcel,
                 <td className="whitespace-nowrap px-3 py-2">
                   <Btn title={t("view")} onClick={() => onView(d)} cls="text-slate-500 hover:bg-sky-50 hover:text-sky-600"><Eye size={18} /></Btn>
                   <Btn title={t("edit")} onClick={() => onEdit(d)} cls="text-slate-500 hover:bg-amber-50 hover:text-amber-600"><Pencil size={18} /></Btn>
-                  <Btn title={t("delete")} onClick={() => onDelete(d)} cls="text-slate-500 hover:bg-red-50 hover:text-red-600"><Trash2 size={18} /></Btn>
+                  {onDelete && <Btn title={t("delete")} onClick={() => onDelete(d)} cls="text-slate-500 hover:bg-red-50 hover:text-red-600"><Trash2 size={18} /></Btn>}
                   <span className="mx-1 inline-block h-5 w-px bg-slate-200 align-middle" />
                   <Btn title={t("excel")} onClick={() => onExcel(d)} cls="text-slate-500 hover:bg-emerald-50 hover:text-emerald-700"><FileSpreadsheet size={18} /></Btn>
                   <Btn title={t("pdf")} onClick={() => onPdf(d)} cls="text-slate-500 hover:bg-rose-50 hover:text-rose-700"><FileText size={18} /></Btn>
