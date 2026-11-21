@@ -3,7 +3,7 @@ import { num } from "./utils";
 
 const fromRow = (r) => ({
   id: r.id, buyer: r.buyer, orderNo: r.order_no, date: r.delivery_date, currency: r.currency,
-  notes: r.notes, receiver: r.receiver, updatedAt: r.updated_at, scanPath: r.scan_path,
+  notes: r.notes, receiver: r.receiver, updatedAt: r.updated_at, createdAt: r.created_at, scanPath: r.scan_path,
   items: [...(r.delivery_items || [])].sort((a, b) => a.position - b.position).map((i) => ({
     id: i.id, color: i.color, logo: i.logo, viscosity: i.viscosity,
     thickness: i.thickness, width: i.width, length: i.length, qty: i.qty, price: i.price,

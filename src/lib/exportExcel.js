@@ -1,5 +1,5 @@
 import ExcelJS from "exceljs";
-import { SUPPLIER, totals, itemSqm, itemTotal, num, specSpans } from "./utils";
+import { SUPPLIER, totals, itemSqm, itemTotal, num, colSpans, SPEC_COLS, specText } from "./utils";
 
 const FONT = "微软雅黑";
 const thin = { style: "thin" };
@@ -8,8 +8,8 @@ const BORDER = { top: thin, left: thin, bottom: thin, right: thin };
 export async function exportExcel(d) {
   const wb = new ExcelJS.Workbook();
   const ws = wb.addWorksheet("Sheet1");
-  [11.9, 8.43, 8.43, 11, 12.54, 8.43, 8.43, 10.5, 8.43, 20.7].forEach((w, i) => (ws.getColumn(i + 1).width = w));
-  const money = `"${d.currency} "#,##0.00`;
+  [11.9, 9.5, 9.5, 11.5, 12.54, 9.5, 11, 15, 15, 22].forEach((w, i) => (ws.getColumn(i + 1).width = w));
+  const money = `#,##0.00" ${d.currency}"`;   // currency on the RIGHT of the number
   const set = (addr, value, { size = 10, bold = false, color, fill, align = "center", wrap = false, fmt } = {}) => {
     const c = ws.getCell(addr);
     c.value = value;
@@ -38,18 +38,19 @@ export async function exportExcel(d) {
   ws.getRow(5).height = 49.5;
 
   // data rows
-  const spans = specSpans(d.items);
   const first = 6;
+  const spans = Object.fromEntries(SPEC_COLS.map((k) => [k, colSpans(d.items, k)]));
   d.items.forEach((it, idx) => {
     const r = first + idx;
     ws.getRow(r).height = 23;
-    if (spans[idx] > 0) {
-      [it.color, it.logo, it.viscosity, `${it.thickness} mic`].forEach((v, k) => {
-        const col = String.fromCharCode(65 + k);
-        set(`${col}${r}`, v, { wrap: true });
-        if (spans[idx] > 1) ws.mergeCells(`${col}${r}:${col}${r + spans[idx] - 1}`);
-      });
-    }
+    SPEC_COLS.forEach((k, ci) => {            // each column merges on its own
+      const n = spans[k][idx];
+      if (n > 0) {
+        const col = String.fromCharCode(65 + ci);
+        set(`${col}${r}`, specText(it, k), { wrap: true });
+        if (n > 1) ws.mergeCells(`${col}${r}:${col}${r + n - 1}`);
+      }
+    });
     set(`E${r}`, num(it.width)); set(`F${r}`, num(it.length)); set(`G${r}`, num(it.qty));
     set(`H${r}`, { formula: `E${r}*F${r}*G${r}`, result: itemSqm(it) });
     set(`I${r}`, num(it.price), { fmt: money });
@@ -63,7 +64,7 @@ export async function exportExcel(d) {
   ["A", "B", "C", "I"].forEach((c) => set(`${c}${tr}`, c === "A" ? "Total" : null, red));
   set(`G${tr}`, { formula: `SUM(G${first}:G${last})`, result: T.qty }, red);
   set(`H${tr}`, { formula: `SUM(H${first}:H${last})`, result: T.sqm }, { ...red, fmt: "0.0_ " });
-  set(`J${tr}`, { formula: `SUM(J${first}:J${last})`, result: T.total }, { ...red, fmt: `"${d.currency} "#,##0.000` });
+  set(`J${tr}`, { formula: `SUM(J${first}:J${last})`, result: T.total }, { ...red, fmt: `#,##0.000" ${d.currency}"` });
   ws.getRow(tr).height = 23;
 
   // notes + receiver

@@ -1,13 +1,14 @@
 import React from "react";
-import { SUPPLIER, totals, itemSqm, itemTotal, plain, money, cnDate, specSpans } from "../lib/utils";
+import { SUPPLIER, totals, itemSqm, itemTotal, plain, money, cnDate, colSpans, SPEC_COLS, specText } from "../lib/utils";
 
 // Pixel layout copied from the original Excel (column widths / row heights in pt * 1.333)
-const W = [88, 72, 72, 82, 93, 80, 80, 86, 74, 150];
+const W = [88, 72, 72, 82, 93, 80, 80, 86, 90, 150];
+export const SHEET_WIDTH = W.reduce((a, b) => a + b);
 const cell = "border border-black px-1 align-middle text-center";
 
 export default function DeliverySheet({ delivery: d, exporting = false }) {
   const T = totals(d);
-  const spans = specSpans(d.items);
+  const spans = Object.fromEntries(SPEC_COLS.map((k) => [k, colSpans(d.items, k)]));
   const px = (pt) => ({ height: pt * 1.333 });
   return (
     <>
@@ -32,15 +33,13 @@ export default function DeliverySheet({ delivery: d, exporting = false }) {
         </tr>
         {d.items.map((it, idx) => (
           <tr key={it.id} style={px(23)} className="text-[13.3px]">
-            {spans[idx] > 0 && [it.color, it.logo, it.viscosity, `${it.thickness} mic`].map((v, k) => (
-              <td key={k} rowSpan={spans[idx]} className={cell}>{v}</td>
-            ))}
+            {SPEC_COLS.map((k) => spans[k][idx] > 0 && <td key={k} rowSpan={spans[k][idx]} className={cell}>{specText(it, k)}</td>)}
             <td className={cell}>{plain(it.width || 0)}</td>
             <td className={cell}>{plain(it.length || 0)}</td>
             <td className={cell}>{plain(it.qty || 0)}</td>
             <td className={cell}>{plain(itemSqm(it))}</td>
-            <td className={cell}>{d.currency} {money(it.price || 0)}</td>
-            <td className={cell}>{d.currency} {money(itemTotal(it))}</td>
+            <td className={cell}>{money(it.price || 0)} {d.currency}</td>
+            <td className={cell}>{money(itemTotal(it))} {d.currency}</td>
           </tr>
         ))}
         <tr style={{ ...px(23), background: "#BFBFBF", color: "#C00000" }} className="text-[13.3px] font-bold">
@@ -49,7 +48,7 @@ export default function DeliverySheet({ delivery: d, exporting = false }) {
           <td className={cell}>{plain(T.qty)}</td>
           <td className={cell}>{T.sqm.toFixed(1)}</td>
           <td className={cell} />
-          <td className={cell}>{d.currency} {money(T.total, 3)}</td>
+          <td className={cell}>{money(T.total, 3)} {d.currency}</td>
         </tr>
         <tr style={px(33)} className="text-[14.7px]">
           <td className={cell} style={{ whiteSpace: "pre-line" }}>{"Notes\n备注"}</td>

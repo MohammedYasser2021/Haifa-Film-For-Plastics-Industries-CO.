@@ -9,9 +9,9 @@ export default function Modal({ title, subtitle, onClose, children, size = "max-
     return () => { document.removeEventListener("keydown", onKey); document.body.style.overflow = ""; };
   }, [onClose]);
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-3 backdrop-blur-sm sm:p-6" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
-      <div className={`flex max-h-[92vh] w-full ${size} flex-col overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-black/5`}>
-        <div className="flex items-start justify-between border-b border-slate-100 px-6 py-4">
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/60 backdrop-blur-sm sm:items-center sm:p-6" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
+      <div className={`flex h-[100dvh] w-full ${size} flex-col overflow-hidden bg-white shadow-2xl ring-1 ring-black/5 sm:h-auto sm:max-h-[92vh] sm:rounded-2xl`}>
+        <div className="flex items-start justify-between border-b border-slate-100 px-4 py-3 sm:px-6 sm:py-4">
           <div>
             <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
             {subtitle && <p className="text-sm text-slate-500">{subtitle}</p>}

@@ -9,8 +9,8 @@ const base = "w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-
 function Field({ label, children, className = "" }) {
   return <label className={`block ${className}`}><span className="mb-1 block text-xs font-medium text-slate-500">{label}</span>{children}</label>;
 }
-function Select({ value, options, onChange }) {
-  return <select className={base} value={value} onChange={(e) => onChange(e.target.value)}>{options.map((o) => <option key={o}>{o}</option>)}</select>;
+function Select({ value, options, onChange, render = (x) => x }) {
+  return <select className={base} value={value} onChange={(e) => onChange(e.target.value)}>{options.map((x) => <option key={x} value={x}>{render(x)}</option>)}</select>;
 }
 function NumInput({ value, onChange, suffix, placeholder }) {
   return (
@@ -23,7 +23,7 @@ function NumInput({ value, onChange, suffix, placeholder }) {
 }
 
 export default function DeliveryForm({ initial, onSave, onCancel }) {
-  const { t } = useI18n();
+  const { t, o, c } = useI18n();
   const [d, setD] = useState(() => structuredClone(initial));
   const [err, setErr] = useState(false);
   const T = totals(d);
@@ -42,14 +42,14 @@ export default function DeliveryForm({ initial, onSave, onCancel }) {
 
   return (
     <>
-      <div className="min-h-0 flex-1 space-y-6 overflow-y-auto bg-slate-50/60 px-6 py-5">
+      <div className="min-h-0 flex-1 space-y-6 overflow-y-auto bg-slate-50/60 px-4 py-4 sm:px-6 sm:py-5">
         <section className="rounded-xl border border-slate-200 bg-white p-4">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <Field label={t("supplier")} className="lg:col-span-2">
               <div className="relative"><input className={`${base} bg-slate-100 pr-9 text-slate-500`} value={SUPPLIER} disabled /><Lock size={14} className="absolute right-3 top-3 text-slate-400" /></div>
             </Field>
             <Field label={t("date")}><input type="date" className={base} value={d.date} onChange={(e) => up("date", e.target.value)} /></Field>
-            <Field label={t("currency")}><Select value={d.currency} options={CURRENCIES} onChange={(v) => up("currency", v)} /></Field>
+            <Field label={t("currency")}><Select value={d.currency} options={CURRENCIES} render={c} onChange={(v) => up("currency", v)} /></Field>
             <Field label={t("buyer")} className="lg:col-span-2"><input className={base} value={d.buyer} onChange={(e) => up("buyer", e.target.value)} placeholder="AWAAD" /></Field>
             <Field label={t("orderNo")} className="lg:col-span-2"><input className={`${base} font-mono tracking-wide`} value={d.orderNo} onChange={(e) => up("orderNo", e.target.value.toUpperCase())} placeholder="HFTBB20261101" /></Field>
           </div>
@@ -68,18 +68,18 @@ export default function DeliveryForm({ initial, onSave, onCancel }) {
                 {d.items.length > 1 && <button onClick={() => delItem(i.id)} className="rounded p-1 text-slate-400 hover:bg-red-50 hover:text-red-600"><Trash2 size={16} /></button>}
               </div>
               <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-                <Field label={t("color")}><Select value={i.color} options={COLORS} onChange={(v) => upItem(i.id, "color", v)} /></Field>
-                <Field label={t("logo")}><Select value={i.logo} options={LOGOS} onChange={(v) => upItem(i.id, "logo", v)} /></Field>
-                <Field label={t("viscosity")}><Select value={i.viscosity} options={VISCOSITIES} onChange={(v) => upItem(i.id, "viscosity", v)} /></Field>
+                <Field label={t("color")}><Select value={i.color} options={COLORS} render={o} onChange={(v) => upItem(i.id, "color", v)} /></Field>
+                <Field label={t("logo")}><Select value={i.logo} options={LOGOS} render={o} onChange={(v) => upItem(i.id, "logo", v)} /></Field>
+                <Field label={t("viscosity")}><Select value={i.viscosity} options={VISCOSITIES} render={o} onChange={(v) => upItem(i.id, "viscosity", v)} /></Field>
                 <Field label={t("thickness")}><NumInput value={i.thickness} suffix="mic" placeholder="35" onChange={(v) => upItem(i.id, "thickness", v)} /></Field>
-                <Field label={t("width")}><NumInput value={i.width} suffix="m" onChange={(v) => upItem(i.id, "width", v)} /></Field>
-                <Field label={t("length")}><NumInput value={i.length} suffix="m" onChange={(v) => upItem(i.id, "length", v)} /></Field>
-                <Field label={t("qty")}><NumInput value={i.qty} suffix="roll" onChange={(v) => upItem(i.id, "qty", v)} /></Field>
+                <Field label={t("width")}><NumInput value={i.width} suffix={t("meter")} onChange={(v) => upItem(i.id, "width", v)} /></Field>
+                <Field label={t("length")}><NumInput value={i.length} suffix={t("meter")} onChange={(v) => upItem(i.id, "length", v)} /></Field>
+                <Field label={t("qty")}><NumInput value={i.qty} suffix={t("roll")} onChange={(v) => upItem(i.id, "qty", v)} /></Field>
                 <Field label={t("price")}><NumInput value={i.price} suffix={d.currency} onChange={(v) => upItem(i.id, "price", v)} /></Field>
               </div>
               <div className="mt-3 flex justify-end gap-6 border-t border-slate-100 pt-3 text-sm">
                 <span className="text-slate-500">{t("sqm")}: <b className="text-slate-800">{plain(itemSqm(i))}</b></span>
-                <span className="text-slate-500">{t("total")}: <b className="text-slate-800">{d.currency} {money(itemTotal(i))}</b></span>
+                <span className="text-slate-500">{t("total")}: <b className="text-slate-800">{money(itemTotal(i))} {d.currency}</b></span>
               </div>
             </div>
           ))}
@@ -91,11 +91,11 @@ export default function DeliveryForm({ initial, onSave, onCancel }) {
         </section>
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 bg-white px-6 py-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 bg-white px-4 py-3 sm:px-6 sm:py-4">
         <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm">
           <span className="text-slate-500">{t("qty")}: <b className="text-slate-900">{plain(T.qty)}</b></span>
           <span className="text-slate-500">{t("sqm")}: <b className="text-slate-900">{plain(T.sqm)}</b></span>
-          <span className="text-slate-500">{t("total")}: <b className="text-red-700">{d.currency} {money(T.total, 3)}</b></span>
+          <span className="text-slate-500">{t("total")}: <b className="text-red-700">{money(T.total, 3)} {d.currency}</b></span>
         </div>
         <div className="flex items-center gap-2">
           {err && <span className="mr-2 text-sm text-red-600">{t("required")}</span>}

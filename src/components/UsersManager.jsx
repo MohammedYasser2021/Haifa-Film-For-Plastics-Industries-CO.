@@ -22,12 +22,12 @@ async function call(action, payload = {}) {
     let msg = error.message;
 
     try {
-  const response = await error.context.json();
+      const response = await error.context.json();
 
-  console.error("Full Edge Function Error:", response);
+      console.error("Full Edge Function Error:", response);
 
-  msg = response.details || response.error || msg;
-} catch {}
+      msg = response.details || response.error || msg;
+    } catch {}
 
     console.error("Function error:", msg);
     throw new Error(msg);
@@ -67,10 +67,17 @@ export default function UsersManager() {
     if (!window.confirm(`${t("confirmDeleteUser")} ${u.email}?`)) return;
     try { await call("delete", { id: u.id }); await load(); } catch (e) { setErr(e.message); }
   };
+  const [copied, setCopied] = useState(false);
+  const gen = () => {
+    const ch = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
+    const a = crypto.getRandomValues(new Uint32Array(12));
+    setForm((f) => ({ ...f, password: Array.from(a, (x) => ch[x % ch.length]).join("") }));
+  };
+  const copy = async () => { await navigator.clipboard.writeText(form.password); setCopied(true); setTimeout(() => setCopied(false), 1500); };
   const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
 
   return (
-    <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-6">
+    <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4 sm:p-6">
       <div className="flex items-center justify-between">
         <p className="text-sm text-slate-500">{users.length} {t("users")}</p>
         <button onClick={() => setForm({ email: "", full_name: "", role: "editor", password: "" })} className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"><UserPlus size={16} />{t("addUser")}</button>
@@ -84,8 +91,15 @@ export default function UsersManager() {
           <label className="block text-xs font-medium text-slate-500">{t("fullName")}<input className={`${inp} mt-1`} value={form.full_name} onChange={set("full_name")} /></label>
           <label className="block text-xs font-medium text-slate-500">{t("role")}
             <select className={`${inp} mt-1`} value={form.role} onChange={set("role")}>{ROLES.map((r) => <option key={r} value={r}>{t(r)}</option>)}</select></label>
-          <label className="block text-xs font-medium text-slate-500">{form.id ? t("newPassword") : t("passwordMin")}
-            <input type="text" minLength={8} required={!form.id} autoComplete="off" className={`${inp} mt-1`} value={form.password} onChange={set("password")} /></label>
+          <div className="sm:col-span-2">
+            <span className="block text-xs font-medium text-slate-500">{form.id ? t("newPassword") : t("passwordMin")}</span>
+            <div className="mt-1 flex gap-2">
+              <input type="text" minLength={8} required={!form.id} autoComplete="off" placeholder={form.id ? "••••••••" : ""} className={inp} value={form.password} onChange={set("password")} />
+              <button type="button" onClick={gen} className="shrink-0 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 hover:bg-slate-50">{t("generate")}</button>
+              <button type="button" onClick={copy} disabled={!form.password} className="shrink-0 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 hover:bg-slate-50 disabled:opacity-40">{copied ? t("copied") : t("copy")}</button>
+            </div>
+            {form.id && <p className="mt-1 text-xs text-slate-400">{t("pwHint")}</p>}
+          </div>
           <div className="flex justify-end gap-2 sm:col-span-2">
             <button type="button" onClick={() => setForm(null)} className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm text-slate-600 hover:bg-slate-50">{t("cancel")}</button>
             <button disabled={busy} className="rounded-lg bg-indigo-600 px-5 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-60">{busy ? t("loading") : t("save")}</button>
@@ -96,7 +110,7 @@ export default function UsersManager() {
       <div className="overflow-x-auto rounded-xl border border-slate-200">
         <table className="w-full text-sm">
           <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
-            <tr>{["fullName", "email", "role", "lastLogin", "actions"].map((k) => <th key={k} className="px-4 py-3 text-start font-semibold">{t(k)}</th>)}</tr>
+            <tr>{["fullName", "email", "role", "lastLogin", "actions"].map((k) => <th key={k} className={`px-4 py-3 text-start font-semibold ${k === "lastLogin" ? "hidden sm:table-cell" : ""}`}>{t(k)}</th>)}</tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
             {loading && <tr><td colSpan={5} className="p-6 text-center text-slate-400">{t("loading")}</td></tr>}
@@ -105,7 +119,7 @@ export default function UsersManager() {
                 <td className="px-4 py-3 font-medium text-slate-900">{u.full_name || "—"}</td>
                 <td className="px-4 py-3 text-slate-600">{u.email}</td>
                 <td className="px-4 py-3"><span className={`rounded-md px-2 py-1 text-xs font-medium ${badge[u.role]}`}>{t(u.role)}</span></td>
-                <td className="px-4 py-3 text-slate-500">{u.last_sign_in_at ? u.last_sign_in_at.slice(0, 10) : t("never")}</td>
+                <td className="hidden px-4 py-3 text-slate-500 sm:table-cell">{u.last_sign_in_at ? u.last_sign_in_at.slice(0, 10) : t("never")}</td>
                 <td className="whitespace-nowrap px-2 py-1">
                   {u.role !== "owner" && <>
                     <button title={t("edit")} onClick={() => setForm({ id: u.id, email: u.email, full_name: u.full_name, role: u.role, password: "" })} className="rounded-lg p-2 text-slate-500 hover:bg-amber-50 hover:text-amber-600"><Pencil size={18} /></button>

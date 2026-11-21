@@ -33,3 +33,40 @@ export const specSpans = (items) => {
   });
   return spans;
 };
+
+// merges consecutive identical values of ONE column (each column merges on its own, like the original Excel)
+export const colSpans = (items, key) => {
+  const spans = items.map(() => 0);
+  let start = 0;
+  items.forEach((it, idx) => {
+    if (idx > 0 && String(it[key]) === String(items[idx - 1][key])) spans[start]++;
+    else { start = idx; spans[idx] = 1; }
+  });
+  return spans;
+};
+export const SPEC_COLS = ["color", "logo", "viscosity", "thickness"];
+export const specText = (it, key) => (key === "thickness" ? `${it.thickness} mic` : it[key]);
+
+export const fmt = (v) => Number(v).toLocaleString("en-US", { maximumFractionDigits: 2 });
+export const today = () => new Date().toISOString().slice(0, 10);
+
+export const duplicateDelivery = (d) => ({
+  ...d, id: crypto.randomUUID(), orderNo: "", date: today(), notes: "", receiver: "", updatedAt: undefined, createdAt: undefined,
+  items: d.items.map((i) => ({ ...i, id: crypto.randomUUID() })),
+});
+
+export function sortList(list, { key, dir }) {
+  const val = (d) => {
+    if (key === "date") return d.date;
+    if (key === "added") return d.createdAt || "";
+    if (key === "buyer") return d.buyer.toLowerCase();
+    if (key === "orderNo") return d.orderNo;
+    return totals(d)[key];
+  };
+  const m = dir === "asc" ? 1 : -1;
+  return [...list].sort((a, b) => {
+    const x = val(a), y = val(b);
+    const c = typeof x === "number" ? x - y : String(x).localeCompare(String(y));
+    return c ? c * m : (b.createdAt || "").localeCompare(a.createdAt || "");
+  });
+}
