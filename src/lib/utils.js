@@ -70,3 +70,6 @@ export function sortList(list, { key, dir }) {
     return c ? c * m : (b.createdAt || "").localeCompare(a.createdAt || "");
   });
 }
+
+export const COMPANY_SHORT = "Haifa Film";
+export const COMPANY_SUB = "for Plastic Industries Co";

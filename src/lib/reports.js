@@ -15,11 +15,11 @@ export function periodRows(list, mode, year, cur) {
   return yearsIn(list).map((y) => ({ key: y, ...agg(list.filter((d) => d.date.startsWith(y)), cur) }));
 }
 
-export function buyerRows(list, year, cur) {
+export function buyerRows(list, year, cur, label = (d) => d.buyer) {
   const map = new Map();
   list.filter((d) => !year || d.date.startsWith(year)).forEach((d) => {
-    const k = d.buyer.trim().toLowerCase();
-    if (!map.has(k)) map.set(k, { key: k, name: d.buyer.trim(), ds: [] });
+    const k = d.customerId || "b:" + d.buyer.trim().toLowerCase();
+    if (!map.has(k)) map.set(k, { key: k, name: label(d), ds: [] });
     map.get(k).ds.push(d);
   });
   return [...map.values()]

@@ -14,7 +14,7 @@ export default function Stats({ list }) {
     [Wallet, t("total"), Object.keys(byCur).length ? Object.entries(byCur).map(([c, v]) => `${money(v)} ${c}`).join(" · ") : "—", "bg-emerald-50 text-emerald-600"],
   ];
   return (
-    <div className="mb-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+    <div className="mb-4 grid grid-cols-2 sm:mb-6 gap-3 sm:gap-4 lg:grid-cols-4">
       {cards.map(([Icon, label, value, tone]) => (
         <div key={label} className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:gap-4 sm:p-4">
           <div className={`rounded-xl p-2 sm:p-3 ${tone}`}><Icon size={22} /></div>

@@ -4,7 +4,7 @@ import { currenciesIn } from "../lib/reports";
 import PeriodReport from "./PeriodReport";
 import BuyersReport from "./BuyersReport";
 
-export default function Reports({ list }) {
+export default function Reports({ list, label }) {
   const { t, c } = useI18n();
   const [tab, setTab] = useState("period");
   const [curSel, setCur] = useState("");
@@ -22,7 +22,7 @@ export default function Reports({ list }) {
           </select>
         )}
       </div>
-      {tab === "period" ? <PeriodReport list={list} cur={cur} /> : <BuyersReport list={list} cur={cur} />}
+      {tab === "period" ? <PeriodReport list={list} cur={cur} /> : <BuyersReport list={list} cur={cur} label={label} />}
     </div>
   );
 }

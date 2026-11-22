@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Plus, Trash2, Lock } from "lucide-react";
 import { useI18n } from "../lib/i18n";
+import CustomerPicker from "./CustomerPicker";
+import { Spinner } from "./Spinner";
 import { COLORS, LOGOS, VISCOSITIES, CURRENCIES, SUPPLIER, emptyItem, itemSqm, itemTotal, totals, plain, money, num } from "../lib/utils";
 
 const base = "w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition placeholder:text-slate-300 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100";
@@ -22,11 +24,31 @@ function NumInput({ value, onChange, suffix, placeholder }) {
   );
 }
 
-export default function DeliveryForm({ initial, onSave, onCancel }) {
+export default function DeliveryForm({ initial, onSave, onCancel, customers = [] }) {
   const { t, o, c } = useI18n();
-  const [d, setD] = useState(() => structuredClone(initial));
+  const [d, setD] = useState(() => {
+    const c = structuredClone(initial);
+    const code = customers.find((x) => x.id === c.customerId)?.code;
+    if (!c.orderNo && code) c.orderNo = `HF${code}`;   // e.g. duplicated delivery keeps its prefix
+    return c;
+  });
   const [err, setErr] = useState(false);
+  const [busy, setBusy] = useState(false);
   const T = totals(d);
+  // choosing a customer fills "HF" + its code; whatever the user typed after the prefix (the date) is kept
+  const pickCustomer = (v) => setD((p) => {
+    const next = { ...p, ...v };
+    const code = customers.find((x) => x.id === v.customerId)?.code;
+    if (code) {
+      const oldCode = customers.find((x) => x.id === p.customerId)?.code;
+      const oldPrefix = oldCode ? `HF${oldCode}` : "";
+      const prefix = `HF${code}`;
+      const cur = p.orderNo || "";
+      if (!cur || cur === "HF") next.orderNo = prefix;
+      else if (oldPrefix && cur.startsWith(oldPrefix)) next.orderNo = prefix + cur.slice(oldPrefix.length);
+    }
+    return next;
+  });
   const up = (k, v) => setD((p) => ({ ...p, [k]: v }));
   const upItem = (id, k, v) => setD((p) => ({ ...p, items: p.items.map((i) => (i.id === id ? { ...i, [k]: v } : i)) }));
   const delItem = (id) => setD((p) => ({ ...p, items: p.items.filter((i) => i.id !== id) }));
@@ -34,10 +56,11 @@ export default function DeliveryForm({ initial, onSave, onCancel }) {
     const l = p.items.at(-1);
     return { ...p, items: [...p.items, { ...emptyItem(), ...(l && { color: l.color, logo: l.logo, viscosity: l.viscosity, thickness: l.thickness, price: l.price }) }] };
   });
-  const submit = () => {
+  const submit = async () => {
     const ok = d.buyer.trim() && d.orderNo.trim() && d.items.length && d.items.every((i) => num(i.width) && num(i.length) && num(i.qty));
     if (!ok) return setErr(true);
-    onSave({ ...d, buyer: d.buyer.trim(), orderNo: d.orderNo.trim().toUpperCase() });
+    setBusy(true);
+    try { await onSave({ ...d, buyer: d.buyer.trim(), orderNo: d.orderNo.trim().toUpperCase() }); } finally { setBusy(false); }
   };
 
   return (
@@ -50,7 +73,7 @@ export default function DeliveryForm({ initial, onSave, onCancel }) {
             </Field>
             <Field label={t("date")}><input type="date" className={base} value={d.date} onChange={(e) => up("date", e.target.value)} /></Field>
             <Field label={t("currency")}><Select value={d.currency} options={CURRENCIES} render={c} onChange={(v) => up("currency", v)} /></Field>
-            <Field label={t("buyer")} className="lg:col-span-2"><input className={base} value={d.buyer} onChange={(e) => up("buyer", e.target.value)} placeholder="AWAAD" /></Field>
+            <div className="lg:col-span-2"><span className="mb-1 block text-xs font-medium text-slate-500">{t("buyer")}</span><CustomerPicker customers={customers} buyer={d.buyer} customerId={d.customerId} onChange={pickCustomer} inputClass={base} /></div>
             <Field label={t("orderNo")} className="lg:col-span-2"><input className={`${base} font-mono tracking-wide`} value={d.orderNo} onChange={(e) => up("orderNo", e.target.value.toUpperCase())} placeholder="HFTBB20261101" /></Field>
           </div>
           <p className="mt-2 text-xs text-slate-400">{t("orderHint")}</p>
@@ -100,7 +123,7 @@ export default function DeliveryForm({ initial, onSave, onCancel }) {
         <div className="flex items-center gap-2">
           {err && <span className="mr-2 text-sm text-red-600">{t("required")}</span>}
           <button onClick={onCancel} className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50">{t("cancel")}</button>
-          <button onClick={submit} className="rounded-lg bg-indigo-600 px-5 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700">{t("save")}</button>
+          <button onClick={submit} disabled={busy} className="flex min-w-[5.5rem] items-center justify-center rounded-lg bg-indigo-600 px-5 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 disabled:opacity-70">{busy ? <Spinner size={18} /> : t("save")}</button>
         </div>
       </div>
     </>

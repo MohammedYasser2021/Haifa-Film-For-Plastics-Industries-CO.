@@ -2,6 +2,8 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Pencil, Trash2, UserPlus } from "lucide-react";
 import { supabase } from "../lib/supabase";
 import { useI18n } from "../lib/i18n";
+import { useFeedback } from "./Feedback";
+import { Spinner } from "./Spinner";
 
 async function call(action, payload = {}) {
   const { data: { user }, error: authError } =
@@ -42,6 +44,7 @@ const badge = { owner: "bg-purple-100 text-purple-700", admin: "bg-indigo-100 te
 
 export default function UsersManager() {
   const { t } = useI18n();
+  const { success, error: toastError, confirm } = useFeedback();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
@@ -59,13 +62,15 @@ export default function UsersManager() {
     try {
       if (form.id) await call("update", { id: form.id, role: form.role, full_name: form.full_name, password: form.password || undefined });
       else await call("create", { email: form.email.trim(), full_name: form.full_name, role: form.role, password: form.password });
+      success(form.id ? t("userUpdated") : t("userCreated"));
       setForm(null); await load();
-    } catch (e2) { setErr(e2.message); }
+    } catch (e2) { toastError(e2.message); }
     setBusy(false);
   };
   const remove = async (u) => {
-    if (!window.confirm(`${t("confirmDeleteUser")} ${u.email}?`)) return;
-    try { await call("delete", { id: u.id }); await load(); } catch (e) { setErr(e.message); }
+    const ok = await confirm({ title: t("deleteUserTitle"), message: u.email, confirmText: t("yesDelete"), danger: true });
+    if (!ok) return;
+    try { await call("delete", { id: u.id }); await load(); success(t("userDeleted")); } catch (e) { toastError(e.message); }
   };
   const [copied, setCopied] = useState(false);
   const gen = () => {
@@ -102,7 +107,7 @@ export default function UsersManager() {
           </div>
           <div className="flex justify-end gap-2 sm:col-span-2">
             <button type="button" onClick={() => setForm(null)} className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm text-slate-600 hover:bg-slate-50">{t("cancel")}</button>
-            <button disabled={busy} className="rounded-lg bg-indigo-600 px-5 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-60">{busy ? t("loading") : t("save")}</button>
+            <button disabled={busy} className="flex min-w-[5.5rem] items-center justify-center rounded-lg bg-indigo-600 px-5 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-60">{busy ? <Spinner size={18} /> : t("save")}</button>
           </div>
         </form>
       )}
@@ -113,7 +118,7 @@ export default function UsersManager() {
             <tr>{["fullName", "email", "role", "lastLogin", "actions"].map((k) => <th key={k} className={`px-4 py-3 text-start font-semibold ${k === "lastLogin" ? "hidden sm:table-cell" : ""}`}>{t(k)}</th>)}</tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
-            {loading && <tr><td colSpan={5} className="p-6 text-center text-slate-400">{t("loading")}</td></tr>}
+            {loading && <tr><td colSpan={5} className="py-10 text-center"><Spinner size={30} className="mx-auto text-indigo-600" /></td></tr>}
             {users.map((u) => (
               <tr key={u.id} className="hover:bg-slate-50/70">
                 <td className="px-4 py-3 font-medium text-slate-900">{u.full_name || "—"}</td>

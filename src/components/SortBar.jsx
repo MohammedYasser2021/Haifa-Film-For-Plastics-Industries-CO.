@@ -13,14 +13,14 @@ const sel = "rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm out
 export default function SortBar({ sort, onSort, size, onSize, total }) {
   const { t } = useI18n();
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-4 py-3">
+    <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-3 py-2.5 sm:px-4 sm:py-3">
       <span className="text-sm text-slate-500">{total} {t("results")}</span>
       <div className="flex flex-wrap items-center gap-2">
         <ArrowUpDown size={16} className="text-slate-400" />
         <select className={sel} value={`${sort.key}:${sort.dir}`} onChange={(e) => { const [key, dir] = e.target.value.split(":"); onSort({ key, dir }); }}>
           {OPTIONS.map(([v, l]) => <option key={v} value={v}>{t(l)}</option>)}
         </select>
-        <select className={sel} value={size} onChange={(e) => onSize(+e.target.value)} title={t("perPage")}>
+        <select className={`${sel} hidden sm:block`} value={size} onChange={(e) => onSize(+e.target.value)} title={t("perPage")}>
           {[10, 25, 50, 100].map((n) => <option key={n} value={n}>{n} / {t("pageWord")}</option>)}
         </select>
       </div>

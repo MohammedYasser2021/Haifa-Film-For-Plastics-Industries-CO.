@@ -3,12 +3,13 @@ import { useAuth } from "../lib/auth";
 import { useI18n } from "../lib/i18n";
 import Login from "./Login";
 import GuestHome from "./GuestHome";
+import { ScreenLoader } from "./Spinner";
 
 export default function AuthGate({ children }) {
   const { session, role, roleError, signOut } = useAuth();
   const { t } = useI18n();
   if (session === undefined || (session && role === null))
-    return <div className="flex min-h-screen items-center justify-center bg-slate-100 text-slate-500">{t("loading")}</div>;
+    return <ScreenLoader />;
   if (!session) return <Login />;
   if (role === "none")
     return (

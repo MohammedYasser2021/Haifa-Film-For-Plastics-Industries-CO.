@@ -7,11 +7,11 @@ import { exportTable } from "../lib/exportReport";
 
 const sel = "rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100";
 const th = "px-4 py-3 text-start font-semibold";
-export default function BuyersReport({ list, cur }) {
+export default function BuyersReport({ list, cur, label }) {
   const { t } = useI18n();
   const [year, setYear] = useState("");
   const [open, setOpen] = useState(null);
-  const rows = buyerRows(list, year, cur);
+  const rows = buyerRows(list, year, cur, label);
   const buyer = rows.find((b) => b.key === open);
   const Year = <select className={sel} value={year} onChange={(e) => setYear(e.target.value)}><option value="">{t("allYears")}</option>{yearsIn(list).map((y) => <option key={y}>{y}</option>)}</select>;
 
