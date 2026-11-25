@@ -4,24 +4,28 @@ export const LOGOS = ["No Logo", "Logo"];
 export const VISCOSITIES = ["Low", "M", "H", "SH", "SSH"];
 export const VISCOSITY_OPTIONS = ["", ...VISCOSITIES];   // "" = nothing written on the delivery note (left empty in the monthly sheet)
 
-// The logo field stays "No Logo" | "Logo". A brand name is stored after a colon: "Logo:Burj Bond" (no database change needed).
+// The logo field is "No Logo" | "Logo". logoBase also cleans old saved values like "Logo:Brand" (brand names were removed) back to "Logo".
 export const logoBase = (v) => (String(v || "").startsWith("Logo") ? "Logo" : "No Logo");
-export const brandOf = (v) => (String(v || "").startsWith("Logo:") ? String(v).slice(5).trim() : "");
-export const composeLogo = (base, brand) => (base === "Logo" ? (String(brand || "").trim() ? `Logo:${String(brand).trim()}` : "Logo") : "No Logo");
 export const CURRENCIES = ["EGP", "USD", "CNY", "EUR", "GBP", "SAR", "AED"];
 
 export const num = (v) => parseFloat(v) || 0;
 export const itemSqm = (i) => num(i.width) * num(i.length) * num(i.qty);
 export const itemTotal = (i) => itemSqm(i) * num(i.price);
+// OPTIONAL and rare: a delivery whose paper total is not in m2 (e.g. a weight in kg).
+// measure = "m" (default) | "other";  unitName = "kg" ...;  measureTotal = the number written on the paper.
+// Such a delivery adds no m2 to the lists/reports; its own number is shown instead.
+export const isOther = (d) => d.measure === "other";
+export const otherLabel = (d) => String(d.unitName || "").trim();
 export const totals = (d) => ({
   qty: d.items.reduce((s, i) => s + num(i.qty), 0),
-  sqm: d.items.reduce((s, i) => s + itemSqm(i), 0),
+  sqm: isOther(d) ? 0 : d.items.reduce((s, i) => s + itemSqm(i), 0),
+  other: isOther(d) ? num(d.measureTotal) : 0,
   total: d.items.reduce((s, i) => s + itemTotal(i), 0),
 });
 export const emptyItem = () => ({ id: crypto.randomUUID(), color: COLORS[0], logo: LOGOS[0], viscosity: "M", thickness: "", width: "", length: "", qty: "", price: "" });
 export const emptyDelivery = () => ({
   id: crypto.randomUUID(), buyer: "", orderNo: "", date: new Date().toISOString().slice(0, 10),
-  currency: "EGP", items: [emptyItem()], notes: "", receiver: "",
+  currency: "EGP", items: [emptyItem()], notes: "", receiver: "", measure: "m", unitName: "", measureTotal: "",
 });
 
 export const plain = (v) => String(+Number(v).toFixed(4));            // 12437.5
@@ -30,7 +34,7 @@ export const cnDate = (iso) => { const [, m, d] = iso.split("-"); return `${+m}æ
 
 // groups consecutive identical rows (color/logo/viscosity/thickness) -> used for merged cells like the original sheet
 export const specSpans = (items) => {
-  const key = (i) => [i.color, i.logo, i.viscosity, i.thickness].join("|");
+  const key = (i) => [i.color, logoBase(i.logo), i.viscosity, i.thickness].join("|");
   const spans = items.map(() => 0);
   let start = 0;
   items.forEach((it, idx) => {
@@ -45,7 +49,8 @@ export const colSpans = (items, key) => {
   const spans = items.map(() => 0);
   let start = 0;
   items.forEach((it, idx) => {
-    if (idx > 0 && String(it[key]) === String(items[idx - 1][key])) spans[start]++;
+    const v = (x) => (key === "logo" ? logoBase(x.logo) : String(x[key]));
+    if (idx > 0 && v(it) === v(items[idx - 1])) spans[start]++;
     else { start = idx; spans[idx] = 1; }
   });
   return spans;
@@ -53,7 +58,7 @@ export const colSpans = (items, key) => {
 export const SPEC_COLS = ["color", "logo", "viscosity", "thickness"];
 export const specText = (it, key) => {
   if (key === "thickness") return `${it.thickness} mic`;
-  if (key === "logo") return brandOf(it.logo) ? `Logo (${brandOf(it.logo)})` : logoBase(it.logo);
+  if (key === "logo") return logoBase(it.logo);
   return it[key];
 };
 
@@ -61,7 +66,7 @@ export const fmt = (v) => Number(v).toLocaleString("en-US", { maximumFractionDig
 export const today = () => new Date().toISOString().slice(0, 10);
 
 export const duplicateDelivery = (d) => ({
-  ...d, id: crypto.randomUUID(), orderNo: "", date: today(), notes: "", receiver: "", updatedAt: undefined, createdAt: undefined,
+  ...d, id: crypto.randomUUID(), orderNo: "", date: today(), notes: "", receiver: "", measureTotal: "", updatedAt: undefined, createdAt: undefined,
   items: d.items.map((i) => ({ ...i, id: crypto.randomUUID() })),
 });
 
@@ -83,3 +88,22 @@ export function sortList(list, { key, dir }) {
 
 export const COMPANY_SHORT = "Haifa Film";
 export const COMPANY_SUB = "for Plastic Industries Co";
+
+// the optional measure is kept inside the notes column (no database change): a hidden last line  [[hf:{"measure":"other","unitName":"kg","total":1445.4}]]
+const META_RE = /\n?\[\[hf:(\{.*?\})\]\]\s*$/s;
+export function parseNotes(raw) {
+  const text = String(raw || "");
+  const m = text.match(META_RE);
+  if (!m) return { notes: text, meta: {} };
+  let meta = {};
+  try { meta = JSON.parse(m[1]) || {}; } catch { meta = {}; }
+  return { notes: text.replace(META_RE, ""), meta };
+}
+export function composeNotes(d) {
+  const text = String(d.notes || "").replace(META_RE, "");
+  if (!isOther(d)) return text;
+  const meta = { measure: "other" };
+  if (otherLabel(d)) meta.unitName = otherLabel(d);
+  if (String(d.measureTotal ?? "").trim() !== "") meta.total = num(d.measureTotal);
+  return `${text}\n[[hf:${JSON.stringify(meta)}]]`;
+}

@@ -57,7 +57,7 @@ export default function SalesSheet({ list, customers }) {
                 <tr key={i}>
                   <td className={td}>{r.date}</td><td className={td}>{r.cust}</td><td className={td}>{r.order}</td><td className={td}>{r.product}</td>
                   <td className={td}>{r.spec}</td><td className={td}>{r.visc}</td><td className={td}>{r.rolls}</td>
-                  {r.span > 0 && <td className={td} rowSpan={r.span}>{r.sqm}</td>}
+                  {r.span > 0 && <td className={td} rowSpan={r.span}>{r.sqm}{r.unitName ? ` ${r.unitName}` : ""}</td>}
                 </tr>
               ))}
             </tbody>

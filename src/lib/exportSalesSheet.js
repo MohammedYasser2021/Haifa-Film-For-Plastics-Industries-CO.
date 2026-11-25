@@ -1,5 +1,5 @@
 import ExcelJS from "exceljs";
-import { num, itemSqm, brandOf } from "./utils";
+import { num, itemSqm, logoBase, isOther, otherLabel } from "./utils";
 
 // Builds the monthly "销售出库" sheet from the deliveries saved in the system.
 // Layout, fonts, widths, heights, merges and the 合计 row copy the Excel sheet used by the warehouse.
@@ -16,7 +16,7 @@ const WIDTHS = [10, 22, 25, 24, 16, 12, 11, 14, 16.42578125, 9, 9];
 const round1 = (x) => Math.round((x + 1e-9) * 10) / 10;
 const mm = (w) => Math.round(num(w) * 1000);                 // 1.295 m  -> 1295
 const thick = (t) => +(num(t) / 10).toFixed(2);               // 35 mic   -> 3.5   (50 -> 5, 70 -> 7)
-export const productName = (it, lang = "zh") => (lang === "zh" ? `${brandOf(it.logo)}${COLOR_ZH[it.color] || it.color}` : `${brandOf(it.logo)} ${it.color}`.trim());
+export const productName = (it, lang = "zh") => (lang === "zh" ? COLOR_ZH[it.color] || it.color : it.color);
 export const customerName = (d, byId, lang = "zh") => (lang === "zh" ? byId.get(d.customerId)?.nameZh || d.buyer : byId.get(d.customerId)?.nameEn || d.buyer);
 
 // one row per width inside a section (same color/logo/viscosity/thickness); the sqm total is merged over the whole delivery
@@ -31,7 +31,7 @@ export function buildSalesRows(list, customers, year, month, lang = "zh") {
     // one row per width inside each section (same color/logo/viscosity/thickness); ONE merged sqm total for the whole delivery
     const sections = new Map();
     d.items.forEach((it) => {
-      const k = [it.color, it.logo, it.viscosity, it.thickness].join("|");
+      const k = [it.color, logoBase(it.logo), it.viscosity, it.thickness].join("|");
       if (!sections.has(k)) sections.set(k, { it, widths: new Map() });
       const s = sections.get(k);
       s.widths.set(mm(it.width), (s.widths.get(mm(it.width)) || 0) + num(it.qty));
@@ -46,7 +46,8 @@ export function buildSalesRows(list, customers, year, month, lang = "zh") {
       });
     });
     if (d.date !== lastDate) rows[first].date = `${+d.date.slice(5, 7)}.${+d.date.slice(8, 10)}`;
-    rows[first].sqm = round1(d.items.reduce((sum, it) => sum + itemSqm(it), 0));
+    rows[first].unitName = isOther(d) ? otherLabel(d) : "";
+    rows[first].sqm = isOther(d) ? (String(d.measureTotal ?? "").trim() === "" ? null : num(d.measureTotal)) : round1(d.items.reduce((sum, it) => sum + itemSqm(it), 0));
     rows[first].span = rows.length - first;
     lastDate = d.date;
   });

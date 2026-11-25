@@ -1,7 +1,9 @@
 import React from "react";
 import { Eye, Pencil, Trash2, Copy, FileSpreadsheet, FileText, Inbox, ChevronUp, ChevronDown } from "lucide-react";
 import { useI18n } from "../lib/i18n";
-import { totals, plain, money } from "../lib/utils";
+import { totals, plain, money, isOther, otherLabel } from "../lib/utils";
+
+const measureText = (d, T) => `${plain(T.other)} ${otherLabel(d)}`.trim();
 
 const Btn = ({ title, onClick, cls, size = "p-2", children }) => (
   <button title={title} aria-label={title} onClick={onClick} className={`rounded-lg transition ${size} ${cls}`}>{children}</button>
@@ -58,7 +60,7 @@ export default function DeliveryTable(props) {
                   <td className="px-5 py-4"><span className="rounded-md bg-slate-100 px-2 py-1 font-mono text-xs text-slate-700">{d.orderNo}</span></td>
                   <td className="px-5 py-4 text-slate-600">{d.date}</td>
                   <td className="px-5 py-4 text-slate-700">{plain(T.qty)}</td>
-                  <td className="px-5 py-4 text-slate-700">{plain(T.sqm)}</td>
+                  <td className="px-5 py-4 text-slate-700">{isOther(d) ? measureText(d, T) : plain(T.sqm)}</td>
                   <td className="whitespace-nowrap px-5 py-4 font-semibold text-slate-900">{money(T.total)} {d.currency}</td>
                   <td className="whitespace-nowrap px-3 py-2"><Actions d={d} t={t} p={props} /></td>
                 </tr>
@@ -84,7 +86,7 @@ export default function DeliveryTable(props) {
                   <p className="text-xs text-slate-400">{d.date}</p>
                 </div>
               </div>
-              <p className="mt-2 text-xs text-slate-500">{plain(T.qty)} {t("roll")} · {plain(T.sqm)} m²</p>
+              <p className="mt-2 text-xs text-slate-500">{plain(T.qty)} {t("roll")} · {isOther(d) ? measureText(d, T) : `${plain(T.sqm)} m²`}</p>
               <div className="mt-2 flex items-center justify-between border-t border-slate-100 py-1.5" onClick={(e) => e.stopPropagation()}>
                 <Actions d={d} t={t} p={props} mobile />
               </div>
