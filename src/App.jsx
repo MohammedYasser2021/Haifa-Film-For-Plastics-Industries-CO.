@@ -122,7 +122,7 @@ export default function App() {
             style={{ marginBottom: "env(safe-area-inset-bottom)" }}><Plus size={26} /></button>
         </>
       )}
-      {!loading && current === "reports" && <Reports list={list} label={label} />}
+      {!loading && current === "reports" && <Reports list={list} label={label} customers={customers} />}
       {!loading && current === "customers" && <div className={card}><CustomersManager customers={customers} list={list} canDelete={canDelete} onChanged={reload} /></div>}
       {current === "users" && <div className={card}><UsersManager /></div>}
       {current === "backup" && <BackupPage list={list} customers={customers} />}

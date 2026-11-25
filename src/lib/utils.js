@@ -2,6 +2,12 @@ export const SUPPLIER = "Haifa Film for Plastic Industries Co";
 export const COLORS = ["Clear White", "Milky White", "B & W", "Blue"];
 export const LOGOS = ["No Logo", "Logo"];
 export const VISCOSITIES = ["Low", "M", "H", "SH", "SSH"];
+export const VISCOSITY_OPTIONS = ["", ...VISCOSITIES];   // "" = nothing written on the delivery note (left empty in the monthly sheet)
+
+// The logo field stays "No Logo" | "Logo". A brand name is stored after a colon: "Logo:Burj Bond" (no database change needed).
+export const logoBase = (v) => (String(v || "").startsWith("Logo") ? "Logo" : "No Logo");
+export const brandOf = (v) => (String(v || "").startsWith("Logo:") ? String(v).slice(5).trim() : "");
+export const composeLogo = (base, brand) => (base === "Logo" ? (String(brand || "").trim() ? `Logo:${String(brand).trim()}` : "Logo") : "No Logo");
 export const CURRENCIES = ["EGP", "USD", "CNY", "EUR", "GBP", "SAR", "AED"];
 
 export const num = (v) => parseFloat(v) || 0;
@@ -45,7 +51,11 @@ export const colSpans = (items, key) => {
   return spans;
 };
 export const SPEC_COLS = ["color", "logo", "viscosity", "thickness"];
-export const specText = (it, key) => (key === "thickness" ? `${it.thickness} mic` : it[key]);
+export const specText = (it, key) => {
+  if (key === "thickness") return `${it.thickness} mic`;
+  if (key === "logo") return brandOf(it.logo) ? `Logo (${brandOf(it.logo)})` : logoBase(it.logo);
+  return it[key];
+};
 
 export const fmt = (v) => Number(v).toLocaleString("en-US", { maximumFractionDigits: 2 });
 export const today = () => new Date().toISOString().slice(0, 10);

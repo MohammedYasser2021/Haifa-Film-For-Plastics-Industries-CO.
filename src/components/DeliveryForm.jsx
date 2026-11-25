@@ -3,7 +3,7 @@ import { Plus, Trash2, Lock } from "lucide-react";
 import { useI18n } from "../lib/i18n";
 import CustomerPicker from "./CustomerPicker";
 import { Spinner } from "./Spinner";
-import { COLORS, LOGOS, VISCOSITIES, CURRENCIES, SUPPLIER, emptyItem, itemSqm, itemTotal, totals, plain, money, num } from "../lib/utils";
+import { COLORS, LOGOS, VISCOSITY_OPTIONS, CURRENCIES, SUPPLIER, emptyItem, itemSqm, itemTotal, totals, plain, money, num, logoBase, brandOf, composeLogo } from "../lib/utils";
 
 const base = "w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition placeholder:text-slate-300 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100";
 
@@ -92,9 +92,10 @@ export default function DeliveryForm({ initial, onSave, onCancel, customers = []
               </div>
               <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
                 <Field label={t("color")}><Select value={i.color} options={COLORS} render={o} onChange={(v) => upItem(i.id, "color", v)} /></Field>
-                <Field label={t("logo")}><Select value={i.logo} options={LOGOS} render={o} onChange={(v) => upItem(i.id, "logo", v)} /></Field>
-                <Field label={t("viscosity")}><Select value={i.viscosity} options={VISCOSITIES} render={o} onChange={(v) => upItem(i.id, "viscosity", v)} /></Field>
+                <Field label={t("logo")}><Select value={logoBase(i.logo)} options={LOGOS} render={o} onChange={(v) => upItem(i.id, "logo", composeLogo(v, brandOf(i.logo)))} /></Field>
+                <Field label={t("viscosity")}><Select value={i.viscosity} options={VISCOSITY_OPTIONS} render={(x) => (x ? o(x) : "—")} onChange={(v) => upItem(i.id, "viscosity", v)} /></Field>
                 <Field label={t("thickness")}><NumInput value={i.thickness} suffix="mic" placeholder="35" onChange={(v) => upItem(i.id, "thickness", v)} /></Field>
+                {logoBase(i.logo) === "Logo" && <Field label={t("brand")} className="col-span-2 md:col-span-4"><input className={base} value={brandOf(i.logo)} placeholder="e.g. Burj Bond" onChange={(e) => upItem(i.id, "logo", composeLogo("Logo", e.target.value))} /></Field>}
                 <Field label={t("width")}><NumInput value={i.width} suffix={t("meter")} onChange={(v) => upItem(i.id, "width", v)} /></Field>
                 <Field label={t("length")}><NumInput value={i.length} suffix={t("meter")} onChange={(v) => upItem(i.id, "length", v)} /></Field>
                 <Field label={t("qty")}><NumInput value={i.qty} suffix={t("roll")} onChange={(v) => upItem(i.id, "qty", v)} /></Field>

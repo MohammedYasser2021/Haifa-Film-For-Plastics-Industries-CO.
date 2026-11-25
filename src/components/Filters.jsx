@@ -3,7 +3,7 @@ import { Search, X, SlidersHorizontal } from "lucide-react";
 import PeriodBar from "./PeriodBar";
 import SearchSelect from "./SearchSelect";
 import { useI18n } from "../lib/i18n";
-import { COLORS, CURRENCIES, LOGOS, VISCOSITIES, num } from "../lib/utils";
+import { COLORS, CURRENCIES, LOGOS, VISCOSITIES, num, logoBase } from "../lib/utils";
 
 export const emptyFilters = { q: "", customer: "", year: "", month: "", from: "", to: "", currency: "", color: "", thick: "", width: "", length: "", visc: "", logo: "" };
 
@@ -18,7 +18,7 @@ export function applyFilters(list, f, customers = []) {
     (!f.from || d.date >= f.from) && (!f.to || d.date <= f.to) &&
     (!f.currency || d.currency === f.currency) &&
     d.items.some((i) =>
-      (!f.color || i.color === f.color) && (!f.visc || i.viscosity === f.visc) && (!f.logo || i.logo === f.logo) &&
+      (!f.color || i.color === f.color) && (!f.visc || i.viscosity === f.visc) && (!f.logo || logoBase(i.logo) === f.logo) &&
       (!f.thick || num(i.thickness) === num(f.thick)) && (!f.width || Math.abs(num(i.width) - num(f.width)) < 1e-9) &&
       (!f.length || num(i.length) === num(f.length))));
 }
