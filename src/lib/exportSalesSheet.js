@@ -19,7 +19,7 @@ const thick = (t) => +(num(t) / 10).toFixed(2);               // 35 mic   -> 3.5
 export const productName = (it, lang = "zh") => (lang === "zh" ? COLOR_ZH[it.color] || it.color : it.color);
 export const customerName = (d, byId, lang = "zh") => (lang === "zh" ? byId.get(d.customerId)?.nameZh || d.buyer : byId.get(d.customerId)?.nameEn || d.buyer);
 
-// one row per width inside a section (same color/logo/viscosity/thickness); the sqm total is merged over the whole delivery
+// one row per width inside a section (same color/logo/viscosity/thickness), in the order written on the delivery note; the sqm total is merged over the whole delivery
 export function buildSalesRows(list, customers, year, month, lang = "zh") {
   const byId = new Map(customers.map((c) => [c.id, c]));
   const prefix = `${year}-${String(month).padStart(2, "0")}`;
@@ -38,16 +38,22 @@ export function buildSalesRows(list, customers, year, month, lang = "zh") {
     });
     const first = rows.length;
     sections.forEach((s) => {
-      [...s.widths.entries()].sort((a, b) => b[0] - a[0]).forEach(([w, qty]) => {
+      [...s.widths.entries()].forEach(([w, qty]) => {
         rows.push({
           date: null, cust: customerName(d, byId, lang), order: d.orderNo, product: productName(s.it, lang),
           spec: `${w}*${thick(s.it.thickness)}`, visc: s.it.viscosity || null, rolls: qty, sqm: null, span: 0,
         });
       });
     });
+    if (lang === "zh" && d.product) rows.slice(first).forEach((r) => { r.product = d.product; });   // the product name as written in the warehouse sheet
     if (d.date !== lastDate) rows[first].date = `${+d.date.slice(5, 7)}.${+d.date.slice(8, 10)}`;
     rows[first].unitName = isOther(d) ? otherLabel(d) : "";
     rows[first].sqm = isOther(d) ? (String(d.measureTotal ?? "").trim() === "" ? null : num(d.measureTotal)) : round1(d.items.reduce((sum, it) => sum + itemSqm(it), 0));
+    const sh = d.sheet, calcSqm = round1(d.items.reduce((sum, it) => sum + itemSqm(it), 0)), calcRolls = d.items.reduce((sum, it) => sum + num(it.qty), 0);
+    if (sh && !isOther(d) && sh.calcSqm === calcSqm && sh.calcRolls === calcRolls) {   // rows not edited since import -> show the paper's own numbers
+      if (sh.sqm != null) rows[first].sqm = sh.sqm;
+      if (sh.rolls != null) rows[first].rolls += sh.rolls - calcRolls;
+    }
     rows[first].span = rows.length - first;
     lastDate = d.date;
   });

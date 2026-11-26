@@ -24,8 +24,11 @@ function Actions({ d, t, p, mobile }) {
 }
 
 export default function DeliveryTable(props) {
-  const { list, sort, onSort, label } = props;
+  const { list, sort, onSort, label, selected, onToggle, onTogglePage } = props;
   const { t } = useI18n();
+  const selectable = !!(selected && onToggle);                       // checkboxes only for people who may delete
+  const allOnPage = selectable && list.length > 0 && list.every((d) => selected.has(d.id));
+  const Box = ({ d }) => <input type="checkbox" className="h-4 w-4 cursor-pointer accent-indigo-600" checked={selected.has(d.id)} onChange={() => onToggle(d.id)} aria-label={t("selectedN")} />;
   if (!list.length) return <div className="flex flex-col items-center gap-2 p-16 text-slate-400"><Inbox size={40} /><p>{t("empty")}</p></div>;
 
   const Head = ({ k, label: text }) => {
@@ -46,6 +49,7 @@ export default function DeliveryTable(props) {
         <table className="w-full text-sm">
           <thead className="bg-slate-50/80">
             <tr>
+              {selectable && <th className="w-10 px-3 py-3"><input type="checkbox" className="h-4 w-4 cursor-pointer accent-indigo-600" checked={allOnPage} onChange={() => onTogglePage(list.map((d) => d.id), !allOnPage)} title={t("selectAllPage")} aria-label={t("selectAllPage")} /></th>}
               <Head k="buyer" label={t("buyer")} /><Head k="orderNo" label={t("orderNo")} /><Head k="date" label={t("date")} />
               <Head k="qty" label={t("qty")} /><Head k="sqm" label={t("sqm")} /><Head k="total" label={t("total")} />
               <th className="px-5 py-3 text-start text-xs font-semibold uppercase tracking-wide text-slate-500">{t("actions")}</th>
@@ -55,9 +59,10 @@ export default function DeliveryTable(props) {
             {list.map((d) => {
               const T = totals(d);
               return (
-                <tr key={d.id} className="transition hover:bg-slate-50/70">
+                <tr key={d.id} className={`transition hover:bg-slate-50/70 ${selectable && selected.has(d.id) ? "bg-indigo-50/60" : ""}`}>
+                  {selectable && <td className="w-10 px-3 py-4"><Box d={d} /></td>}
                   <td className="px-5 py-4 font-medium text-slate-900">{label(d)}</td>
-                  <td className="px-5 py-4"><span className="rounded-md bg-slate-100 px-2 py-1 font-mono text-xs text-slate-700">{d.orderNo}</span></td>
+                  <td className="px-5 py-4">{d.orderNo ? <span className="rounded-md bg-slate-100 px-2 py-1 font-mono text-xs text-slate-700">{d.orderNo}</span> : <span className="text-slate-300">—</span>}</td>
                   <td className="px-5 py-4 text-slate-600">{d.date}</td>
                   <td className="px-5 py-4 text-slate-700">{plain(T.qty)}</td>
                   <td className="px-5 py-4 text-slate-700">{isOther(d) ? measureText(d, T) : plain(T.sqm)}</td>
@@ -77,9 +82,10 @@ export default function DeliveryTable(props) {
           return (
             <div key={d.id} onClick={() => props.onView(d)} className="cursor-pointer px-4 pt-4 active:bg-slate-50">
               <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
+                {selectable && <div className="pt-1" onClick={(e) => e.stopPropagation()}><Box d={d} /></div>}
+                <div className="min-w-0 flex-1">
                   <p className="truncate text-base font-semibold text-slate-900">{label(d)}</p>
-                  <p className="mt-0.5 font-mono text-xs text-slate-500">{d.orderNo}</p>
+                  <p className="mt-0.5 font-mono text-xs text-slate-500">{d.orderNo || "—"}</p>
                 </div>
                 <div className="shrink-0 text-end">
                   <p className="text-base font-bold text-slate-900">{money(T.total)} <span className="text-xs font-medium text-slate-500">{d.currency}</span></p>

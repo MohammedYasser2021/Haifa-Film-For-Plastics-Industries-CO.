@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { List, BarChart3, Building2, Users, Download, MoreHorizontal, LogOut, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { List, BarChart3, Building2, Users, Download, Upload, MoreHorizontal, LogOut, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { useI18n } from "../lib/i18n";
 import LanguageSwitch from "./LanguageSwitch";
 import logo from "../assets/logo.jpeg";
@@ -9,6 +9,7 @@ const NAV = [
   { k: "deliveries", icon: List, label: "navDeliveries" },
   { k: "reports", icon: BarChart3, label: "reports" },
   { k: "customers", icon: Building2, label: "customers" },
+  { k: "import", icon: Upload, label: "navImport", roles: ["owner", "admin"] },
   { k: "users", icon: Users, label: "users", roles: ["owner"] },
   { k: "backup", icon: Download, label: "backup", roles: ["owner"] },
 ];

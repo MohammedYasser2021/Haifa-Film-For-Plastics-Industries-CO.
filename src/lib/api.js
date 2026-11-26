@@ -5,6 +5,7 @@ const fromRow = (r) => {
   const { notes, meta } = parseNotes(r.notes);
   return {
   measure: meta.measure === "other" || meta.unit === "kg" ? "other" : "m", unitName: meta.unitName ?? (meta.unit === "kg" ? "kg" : ""), measureTotal: meta.total ?? meta.kg ?? "",
+  product: meta.product ?? "", sheet: meta.sheet ?? null,
   id: r.id, buyer: r.buyer, customerId: r.customer_id, orderNo: r.order_no, date: r.delivery_date, currency: r.currency,
   notes, receiver: r.receiver, updatedAt: r.updated_at, createdAt: r.created_at, scanPath: r.scan_path,
   items: [...(r.delivery_items || [])].sort((a, b) => a.position - b.position).map((i) => ({
@@ -39,6 +40,18 @@ export async function deleteDelivery(id) {
   const { data, error } = await supabase.from("deliveries").delete().eq("id", id).select("id");
   if (error) throw error;
   if (!data.length) throw new Error("DENIED");
+}
+
+// several deliveries at once (the items are removed with them); returns how many were really deleted
+export async function deleteDeliveries(ids) {
+  let done = 0;
+  for (let i = 0; i < ids.length; i += 100) {
+    const { data, error } = await supabase.from("deliveries").delete().in("id", ids.slice(i, i + 100)).select("id");
+    if (error) throw error;
+    done += data.length;
+  }
+  if (!done && ids.length) throw new Error("DENIED");
+  return done;
 }
 
 // ---------- customers ----------

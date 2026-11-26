@@ -33,7 +33,7 @@ export default function DeliveryForm({ initial, onSave, onCancel, customers = []
     const c = structuredClone(initial);
     c.items = c.items.map((i) => ({ ...i, logo: logoBase(i.logo) }));   // brand names were removed: "Logo:Brand" -> "Logo"
     const code = customers.find((x) => x.id === c.customerId)?.code;
-    if (!c.orderNo && code) c.orderNo = `HF${code}`;   // e.g. duplicated delivery keeps its prefix
+    if (!c.orderNo && code && !c.createdAt) c.orderNo = `HF${code}`;   // e.g. duplicated delivery keeps its prefix
     return c;
   });
   const [err, setErr] = useState(false);
@@ -95,10 +95,13 @@ export default function DeliveryForm({ initial, onSave, onCancel, customers = []
     });
   };
   const submit = async () => {
-    const ok = d.buyer.trim() && d.orderNo.trim() && d.items.length && d.items.every((i) => num(i.width) && num(i.length) && num(i.qty));
+    const ok = d.buyer.trim() && d.items.length && d.items.every((i) => num(i.width) && num(i.length) && num(i.qty));
     if (!ok) return setErr(true);
     setBusy(true);
-    try { await onSave({ ...d, buyer: d.buyer.trim(), orderNo: d.orderNo.trim().toUpperCase() }); } finally { setBusy(false); }
+    const code = customers.find((x) => x.id === d.customerId)?.code || "";
+    let order = d.orderNo.trim().toUpperCase();
+    if (order === "HF" || order === `HF${code.toUpperCase()}`) order = "";   // only the auto-filled prefix = no order number
+    try { await onSave({ ...d, buyer: d.buyer.trim(), orderNo: order }); } finally { setBusy(false); }
   };
 
   return (

@@ -6,12 +6,12 @@ import { jsPDF } from "jspdf";
 import DeliverySheet from "../components/DeliverySheet";
 
 // Same page size / table position & width as the original PDF (334.463 x 842.01 pt)
-export async function exportPdf(d) {
+export async function exportPdf(d, { lang = "en", buyer } = {}) {
   const host = document.createElement("div");
   host.style.cssText = "position:fixed;left:-10000px;top:0;background:#fff";
   document.body.appendChild(host);
   const root = createRoot(host);
-  flushSync(() => root.render(React.createElement(DeliverySheet, { delivery: d, exporting: true })));
+  flushSync(() => root.render(React.createElement(DeliverySheet, { delivery: d, exporting: true, lang, buyer })));
   await document.fonts?.ready;
   const canvas = await html2canvas(host, { scale: 3, backgroundColor: "#fff" });
   root.unmount(); host.remove();

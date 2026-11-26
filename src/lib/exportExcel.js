@@ -1,15 +1,17 @@
 import ExcelJS from "exceljs";
-import { SUPPLIER, totals, itemSqm, itemTotal, num, colSpans, SPEC_COLS, specText } from "./utils";
+import { SUPPLIER, totals, itemSqm, itemTotal, num, colSpans, SPEC_COLS, specText, curText } from "./utils";
 
 const FONT = "微软雅黑";
 const thin = { style: "thin" };
 const BORDER = { top: thin, left: thin, bottom: thin, right: thin };
 
-export async function exportExcel(d) {
+// lang: the values (colour, logo, viscosity, thickness unit, currency, date format, buyer) follow the language of the app
+export async function exportExcel(d, { lang = "en", buyer } = {}) {
   const wb = new ExcelJS.Workbook();
   const ws = wb.addWorksheet("Sheet1");
   [11.9, 9.5, 9.5, 11.5, 12.54, 9.5, 11, 15, 15, 22].forEach((w, i) => (ws.getColumn(i + 1).width = w));
-  const money = `#,##0.00" ${d.currency}"`;   // currency on the RIGHT of the number
+  const cur = curText(d.currency, lang);
+  const money = `#,##0.00" ${cur}"`;   // currency on the RIGHT of the number
   const set = (addr, value, { size = 10, bold = false, color, fill, align = "center", wrap = false, fmt } = {}) => {
     const c = ws.getCell(addr);
     c.value = value;
@@ -20,7 +22,7 @@ export async function exportExcel(d) {
   };
 
   // rows 1-4
-  [["Supplier (卖家)", SUPPLIER], ["Buyer (买家)", d.buyer], ["Order No. (订单号)", d.orderNo]].forEach(([l, v], i) => {
+  [["Supplier (卖家)", SUPPLIER], ["Buyer (买家)", buyer || d.buyer], ["Order No. (订单号)", d.orderNo]].forEach(([l, v], i) => {
     const r = i + 1;
     ws.mergeCells(`A${r}:F${r}`); ws.mergeCells(`G${r}:J${r}`);
     set(`A${r}`, l, { size: 12, align: "right" }); set(`G${r}`, v, { size: 12 });
@@ -29,7 +31,7 @@ export async function exportExcel(d) {
   const [y, m, day] = d.date.split("-").map(Number);
   ws.mergeCells("A4:F4"); ws.mergeCells("G4:J4");
   set("A4", "Delivery Date（发货日期）", { size: 11, bold: true, fill: "FFFFFF00" });
-  set("G4", new Date(Date.UTC(y, m - 1, day)), { size: 11, bold: true, fill: "FFFFFF00", fmt: 'm"月"d"日"' });
+  set("G4", new Date(Date.UTC(y, m - 1, day)), { size: 11, bold: true, fill: "FFFFFF00", fmt: lang === "zh" ? 'm"月"d"日"' : 'd mmm yyyy' });
   ws.getRow(4).height = 25;
 
   // header row 5
@@ -47,7 +49,7 @@ export async function exportExcel(d) {
       const n = spans[k][idx];
       if (n > 0) {
         const col = String.fromCharCode(65 + ci);
-        set(`${col}${r}`, specText(it, k), { wrap: true });
+        set(`${col}${r}`, specText(it, k, lang), { wrap: true });
         if (n > 1) ws.mergeCells(`${col}${r}:${col}${r + n - 1}`);
       }
     });
@@ -64,7 +66,7 @@ export async function exportExcel(d) {
   ["A", "B", "C", "I"].forEach((c) => set(`${c}${tr}`, c === "A" ? "Total" : null, red));
   set(`G${tr}`, { formula: `SUM(G${first}:G${last})`, result: T.qty }, red);
   set(`H${tr}`, { formula: `SUM(H${first}:H${last})`, result: T.sqm }, { ...red, fmt: "0.0_ " });
-  set(`J${tr}`, { formula: `SUM(J${first}:J${last})`, result: T.total }, { ...red, fmt: `#,##0.000" ${d.currency}"` });
+  set(`J${tr}`, { formula: `SUM(J${first}:J${last})`, result: T.total }, { ...red, fmt: `#,##0.000" ${cur}"` });
   ws.getRow(tr).height = 23;
 
   // notes + receiver

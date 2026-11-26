@@ -25,7 +25,7 @@ export const totals = (d) => ({
 export const emptyItem = () => ({ id: crypto.randomUUID(), color: COLORS[0], logo: LOGOS[0], viscosity: "M", thickness: "", width: "", length: "", qty: "", price: "" });
 export const emptyDelivery = () => ({
   id: crypto.randomUUID(), buyer: "", orderNo: "", date: new Date().toISOString().slice(0, 10),
-  currency: "EGP", items: [emptyItem()], notes: "", receiver: "", measure: "m", unitName: "", measureTotal: "",
+  currency: "EGP", items: [emptyItem()], notes: "", receiver: "", measure: "m", unitName: "", measureTotal: "", product: "", sheet: null,
 });
 
 export const plain = (v) => String(+Number(v).toFixed(4));            // 12437.5
@@ -56,17 +56,27 @@ export const colSpans = (items, key) => {
   return spans;
 };
 export const SPEC_COLS = ["color", "logo", "viscosity", "thickness"];
-export const specText = (it, key) => {
-  if (key === "thickness") return `${it.thickness} mic`;
-  if (key === "logo") return logoBase(it.logo);
-  return it[key];
+
+// Chinese names of the option values (also used by the language switch of the app)
+export const ZH_OPT = { "Clear White": "透明白", "Milky White": "乳白", "B & W": "黑白", Blue: "蓝色", "No Logo": "无印刷", Logo: "有印刷", Low: "低粘", M: "中粘", H: "高粘", SH: "超高粘", SSH: "特高粘" };
+export const ZH_CUR = { EGP: "埃及镑", USD: "美元", CNY: "人民币", EUR: "欧元", GBP: "英镑", SAR: "沙特里亚尔", AED: "迪拉姆" };
+export const optText = (v, lang = "en") => (lang === "zh" ? ZH_OPT[v] || v : v);
+export const curText = (v, lang = "en") => (lang === "zh" ? ZH_CUR[v] || v : v);
+const EN_MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+export const dateText = (iso, lang = "en") => { const [y, m, d] = iso.split("-").map(Number); return lang === "zh" ? `${m}月${d}日` : `${d} ${EN_MON[m - 1]} ${y}`; };
+
+// the text of one spec cell in a delivery sheet (Excel / PDF), in the chosen language
+export const specText = (it, key, lang = "en") => {
+  if (key === "thickness") return lang === "zh" ? `${it.thickness} 微米` : `${it.thickness} mic`;
+  if (key === "logo") return optText(logoBase(it.logo), lang);
+  return optText(it[key], lang);
 };
 
 export const fmt = (v) => Number(v).toLocaleString("en-US", { maximumFractionDigits: 2 });
 export const today = () => new Date().toISOString().slice(0, 10);
 
 export const duplicateDelivery = (d) => ({
-  ...d, id: crypto.randomUUID(), orderNo: "", date: today(), notes: "", receiver: "", measureTotal: "", updatedAt: undefined, createdAt: undefined,
+  ...d, id: crypto.randomUUID(), orderNo: "", date: today(), notes: "", receiver: "", measureTotal: "", sheet: null, updatedAt: undefined, createdAt: undefined,
   items: d.items.map((i) => ({ ...i, id: crypto.randomUUID() })),
 });
 
@@ -101,9 +111,13 @@ export function parseNotes(raw) {
 }
 export function composeNotes(d) {
   const text = String(d.notes || "").replace(META_RE, "");
-  if (!isOther(d)) return text;
-  const meta = { measure: "other" };
-  if (otherLabel(d)) meta.unitName = otherLabel(d);
-  if (String(d.measureTotal ?? "").trim() !== "") meta.total = num(d.measureTotal);
-  return `${text}\n[[hf:${JSON.stringify(meta)}]]`;
+  const meta = {};
+  if (isOther(d)) {
+    meta.measure = "other";
+    if (otherLabel(d)) meta.unitName = otherLabel(d);
+    if (String(d.measureTotal ?? "").trim() !== "") meta.total = num(d.measureTotal);
+  }
+  if (String(d.product || "").trim()) meta.product = String(d.product).trim();   // product name written on the note / in the warehouse sheet (e.g. "KEMET乳白膜")
+  if (d.sheet) meta.sheet = d.sheet;                                           // totals written on the paper when they differ from the rows (used only by the monthly sheet)
+  return Object.keys(meta).length ? `${text}\n[[hf:${JSON.stringify(meta)}]]` : text;
 }

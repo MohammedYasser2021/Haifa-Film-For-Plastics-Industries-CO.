@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Plus } from "lucide-react";
+import { Plus, Trash2, X } from "lucide-react";
 import { useAuth } from "./lib/auth";
 import { useI18n } from "./lib/i18n";
-import { fetchDeliveries, fetchCustomers, saveDelivery, deleteDelivery } from "./lib/api";
+import { fetchDeliveries, fetchCustomers, saveDelivery, deleteDelivery, deleteDeliveries } from "./lib/api";
 import { emptyDelivery, sortList, duplicateDelivery } from "./lib/utils";
 import { exportExcel } from "./lib/exportExcel";
 import { exportPdf } from "./lib/exportPdf";
@@ -21,9 +21,10 @@ import Reports from "./components/Reports";
 import CustomersManager from "./components/CustomersManager";
 import UsersManager from "./components/UsersManager";
 import BackupPage from "./components/BackupPage";
+import ImportPage from "./components/ImportPage";
 import Modal from "./components/Modal";
 
-const TITLES = { deliveries: ["navDeliveries", "deliveriesSub"], reports: ["reports", "reportsSub"], customers: ["customers", "customersSub"], users: ["users", "usersSub"], backup: ["backup", "backupSub"] };
+const TITLES = { deliveries: ["navDeliveries", "deliveriesSub"], reports: ["reports", "reportsSub"], customers: ["customers", "customersSub"], users: ["users", "usersSub"], backup: ["backup", "backupSub"], import: ["navImport", "importSub"] };
 const card = "overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm";
 
 export default function App() {
@@ -40,6 +41,7 @@ export default function App() {
   const [pg, setPg] = useState(1);
   const [size, setSize] = useState(25);
   const [modal, setModal] = useState(null); // {type:"view"|"form", delivery}
+  const [selected, setSelected] = useState(() => new Set());   // ids ticked in the list (admins / owner)
 
   const reload = useCallback(async () => {
     try { const [d, c] = await Promise.all([fetchDeliveries(), fetchCustomers()]); setList(d); setCustomers(c); setMsg(""); }
@@ -63,6 +65,7 @@ export default function App() {
   const curPage = Math.min(pg, pages);
   const shown = sorted.slice((curPage - 1) * size, curPage * size);
   useEffect(() => setPg(1), [filters, sort, size]);
+  useEffect(() => setSelected((p) => { const ids = new Set(list.map((d) => d.id)); const n = new Set([...p].filter((id) => ids.has(id))); return n.size === p.size ? p : n; }), [list]);   // forget ids that no longer exist
 
   const close = useCallback(() => setModal(null), []);
   const canDelete = ["owner", "admin"].includes(role);
@@ -74,19 +77,29 @@ export default function App() {
     catch (e) { error(e.message === "CONFLICT" ? t("conflict") : t("saveError")); }
   };
   const remove = async (d) => {
-    const ok = await confirm({ title: t("deleteTitle"), message: `${t("confirmDelete")}  ${d.orderNo}`, confirmText: t("yesDelete"), danger: true });
+    const ok = await confirm({ title: t("deleteTitle"), message: `${t("confirmDelete")}  ${d.orderNo || `${label(d)} ${d.date}`}`, confirmText: t("yesDelete"), danger: true });
     if (!ok) return;
     try { await deleteDelivery(d.id); await reload(); success(t("deletedOk")); }
     catch (e) { error(e.message === "DENIED" ? t("onlyAdmin") : t("saveError")); }
   };
+  const fill = (text, n) => text.replace("{0}", n);
+  const toggleOne = (id) => setSelected((p) => { const n = new Set(p); n.has(id) ? n.delete(id) : n.add(id); return n; });
+  const togglePage = (ids, on) => setSelected((p) => { const n = new Set(p); ids.forEach((id) => (on ? n.add(id) : n.delete(id))); return n; });
+  const removeMany = async (ids, titleKey, msgKey, twice) => {
+    if (!ids.length) return;
+    if (!(await confirm({ title: t(titleKey), message: fill(t(msgKey), ids.length), confirmText: t("yesDelete"), danger: true }))) return;
+    if (twice && !(await confirm({ title: t("deleteAllAgainTitle"), message: fill(t("deleteAllAgainMsg"), ids.length), confirmText: t("yesDelete"), danger: true }))) return;
+    try { const n = await deleteDeliveries(ids); setSelected(new Set()); await reload(); success(`${t("deletedN")}: ${n}`); }
+    catch (e) { error(e.message === "DENIED" ? t("onlyAdmin") : t("saveError")); }
+  };
   const download = (fn) => async (d) => {
-    try { await fn(d); success(t("downloaded")); } catch { error(t("exportError")); }
+    try { await fn(d, { lang, buyer: label(d) }); success(t("downloaded")); } catch { error(t("exportError")); }
   };
   const doExcel = download(exportExcel);
   const doPdf = download(exportPdf);
 
   // a page the role may not open falls back to deliveries
-  const allowed = ["users", "backup"].includes(page) ? role === "owner" : true;
+  const allowed = ["users", "backup"].includes(page) ? role === "owner" : page === "import" ? ["owner", "admin"].includes(role) : true;
   const current = allowed ? page : "deliveries";
   const [title, sub] = TITLES[current];
 
@@ -102,14 +115,27 @@ export default function App() {
 
       {msg && <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{msg}</div>}
 
-      {loading && ["deliveries", "reports", "customers"].includes(current) && <PageLoader />}
+      {loading && ["deliveries", "reports", "customers", "import"].includes(current) && <PageLoader />}
       {!loading && current === "deliveries" && (
         <>
           <Stats list={filtered} />
           <div className={card}>
             <Filters value={filters} onChange={setFilters} customers={customers} list={list} />
             <SortBar sort={sort} onSort={setSort} size={size} onSize={setSize} total={sorted.length} />
+            {canDelete && (selected.size > 0 || role === "owner") && (
+              <div className="flex flex-wrap items-center gap-2 border-b border-slate-100 bg-slate-50/60 px-4 py-2.5 text-sm">
+                {selected.size > 0 && <>
+                  <span className="font-medium text-slate-700">{selected.size} {t("selectedN")}</span>
+                  <button onClick={() => removeMany([...selected], "deleteManyTitle", "deleteManyMsg", false)} className="flex items-center gap-1.5 rounded-lg bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700"><Trash2 size={14} />{t("deleteSelected")} ({selected.size})</button>
+                  <button onClick={() => setSelected(new Set())} className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50"><X size={14} />{t("clearSel")}</button>
+                </>}
+                {role === "owner" && sorted.length > 0 && (
+                  <button onClick={() => removeMany(sorted.map((d) => d.id), "deleteAllTitle", "deleteAllMsg", true)} className="ms-auto flex items-center gap-1.5 rounded-lg border border-red-200 bg-white px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50"><Trash2 size={14} />{t("deleteAll")} ({sorted.length})</button>
+                )}
+              </div>
+            )}
             <DeliveryTable list={shown} sort={sort} onSort={setSort} label={label}
+              selected={canDelete ? selected : null} onToggle={toggleOne} onTogglePage={togglePage}
               onView={(d) => setModal({ type: "view", delivery: d })}
               onEdit={(d) => setModal({ type: "form", delivery: d })}
               onDuplicate={(d) => setModal({ type: "form", delivery: duplicateDelivery(d) })}
@@ -124,6 +150,7 @@ export default function App() {
       )}
       {!loading && current === "reports" && <Reports list={list} label={label} customers={customers} />}
       {!loading && current === "customers" && <div className={card}><CustomersManager customers={customers} list={list} canDelete={canDelete} onChanged={reload} /></div>}
+      {!loading && current === "import" && <ImportPage list={list} customers={customers} onSaved={reload} />}
       {current === "users" && <div className={card}><UsersManager /></div>}
       {current === "backup" && <BackupPage list={list} customers={customers} />}
 
@@ -135,7 +162,7 @@ export default function App() {
       {modal?.type === "view" && (
         <Modal size="max-w-6xl" title={t("details")} subtitle={modal.delivery.orderNo} onClose={close}>
           <div className="min-h-0 flex-1 overflow-auto bg-slate-50 p-3 sm:p-6">
-            <FitSheet width={SHEET_WIDTH}><DeliverySheet delivery={modal.delivery} /></FitSheet>
+            <FitSheet width={SHEET_WIDTH}><DeliverySheet delivery={modal.delivery} lang={lang} buyer={label(modal.delivery)} /></FitSheet>
           </div>
           <div className="flex justify-end gap-2 border-t border-slate-100 px-4 py-3 sm:px-6">
             <button onClick={() => doExcel(modal.delivery)} className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">{t("excel")}</button>
