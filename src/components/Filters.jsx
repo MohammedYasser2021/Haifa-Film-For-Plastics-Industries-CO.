@@ -23,7 +23,7 @@ export function applyFilters(list, f, customers = []) {
       (!f.length || num(i.length) === num(f.length))));
 }
 
-const inp = "w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100";
+const inp = "w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-sky-500 focus:ring-4 focus:ring-sky-100";
 function Label({ text, children }) {
   return <label className="block text-xs font-medium text-slate-500">{text}<div className="mt-1">{children}</div></label>;
 }
@@ -56,9 +56,9 @@ export default function Filters({ value, onChange, customers = [], list = [] }) 
         </div>
         {customerSelect("hidden w-60 shrink-0 sm:block")}
         <button onClick={() => setOpen(!open)}
-          className={`flex shrink-0 items-center gap-2 rounded-xl border px-3.5 py-2.5 text-sm font-medium transition ${open || active ? "border-indigo-300 bg-indigo-50 text-indigo-700" : "border-slate-200 text-slate-600 hover:bg-slate-50"}`}>
+          className={`flex shrink-0 items-center gap-2 rounded-xl border px-3.5 py-2.5 text-sm font-medium transition ${open || active ? "border-sky-300 bg-sky-50 text-sky-700" : "border-slate-200 text-slate-600 hover:bg-slate-50"}`}>
           <SlidersHorizontal size={17} /><span className="hidden sm:inline">{t("filters")}</span>
-          {active > 0 && <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-indigo-600 px-1 text-xs text-white">{active}</span>}
+          {active > 0 && <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-sky-600 px-1 text-xs text-white">{active}</span>}
         </button>
       </div>
 

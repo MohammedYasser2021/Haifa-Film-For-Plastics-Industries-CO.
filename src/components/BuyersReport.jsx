@@ -5,7 +5,7 @@ import { fmt, money, totals } from "../lib/utils";
 import { buyerRows, yearsIn } from "../lib/reports";
 import { exportTable } from "../lib/exportReport";
 
-const sel = "rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100";
+const sel = "rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-100";
 const th = "px-4 py-3 text-start font-semibold";
 export default function BuyersReport({ list, cur, label }) {
   const { t } = useI18n();
@@ -64,7 +64,7 @@ export default function BuyersReport({ list, cur, label }) {
           <tbody className="divide-y divide-slate-100">
             {rows.map((b) => (
               <tr key={b.key} onClick={() => setOpen(b.key)} className="cursor-pointer hover:bg-slate-50">
-                <td className="px-4 py-3 font-medium text-indigo-700">{b.name}</td><td className="px-4 py-3">{b.count}</td><td className="px-4 py-3">{fmt(b.qty)}</td><td className="px-4 py-3">{fmt(b.sqm)}</td>
+                <td className="px-4 py-3 font-medium text-sky-700">{b.name}</td><td className="px-4 py-3">{b.count}</td><td className="px-4 py-3">{fmt(b.qty)}</td><td className="px-4 py-3">{fmt(b.sqm)}</td>
                 <td className="whitespace-nowrap px-4 py-3">{money(b.amount)}</td><td className="px-4 py-3 text-slate-500">{b.last}</td>
               </tr>
             ))}

@@ -109,7 +109,7 @@ export default function App() {
       <div className="mb-6 hidden items-end justify-between gap-4 lg:flex">
         <div><h1 className="text-2xl font-bold text-slate-900">{t(title)}</h1><p className="mt-1 text-sm text-slate-500">{t(sub)}</p></div>
         {current === "deliveries" && (
-          <button onClick={newDelivery} className="flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-indigo-700"><Plus size={18} />{t("newDelivery")}</button>
+          <button onClick={newDelivery} className="flex items-center gap-2 rounded-xl bg-sky-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-sky-700"><Plus size={18} />{t("newDelivery")}</button>
         )}
       </div>
 
@@ -144,7 +144,7 @@ export default function App() {
           </div>
           {/* floating "new delivery" button on phones / tablets */}
           <button onClick={newDelivery} aria-label={t("newDelivery")}
-            className="fixed bottom-20 end-4 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-indigo-600 text-white shadow-lg shadow-indigo-600/30 transition active:scale-95 lg:hidden"
+            className="fixed bottom-20 end-4 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-sky-600 text-white shadow-lg shadow-sky-600/30 transition active:scale-95 lg:hidden"
             style={{ marginBottom: "env(safe-area-inset-bottom)" }}><Plus size={26} /></button>
         </>
       )}
@@ -166,7 +166,7 @@ export default function App() {
           </div>
           <div className="flex justify-end gap-2 border-t border-slate-100 px-4 py-3 sm:px-6">
             <button onClick={() => doExcel(modal.delivery)} className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">{t("excel")}</button>
-            <button onClick={() => doPdf(modal.delivery)} className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">{t("pdf")}</button>
+            <button onClick={() => doPdf(modal.delivery)} className="rounded-xl bg-sky-600 px-4 py-2 text-sm font-medium text-white hover:bg-sky-700">{t("pdf")}</button>
           </div>
         </Modal>
       )}

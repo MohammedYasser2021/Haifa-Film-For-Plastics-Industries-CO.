@@ -1,5 +1,9 @@
 export const extra = {
   en: {
+    guestTag: "Plastic film, engineered with precision",
+    guestC1T: "Modern production lines", guestC1D: "Automated lines turning raw material into consistent, high-quality film.",
+    guestC2T: "Film rolls made to order", guestC2D: "Colors, printing, thickness and width tailored to every customer.",
+    guestC3T: "Strict quality control", guestC3D: "Every roll is checked before it leaves the factory.",
     navImport: "Import", importSub: "Import the organized monthly sheets into the deliveries of the system.",
     excelIntro: "Upload the organized sheets (one file per month, sheet \"Deliveries\"). Rows of the same delivery are joined, every row is imported exactly as written (width × length × rolls, nothing is merged or averaged), the total is checked against the delivery note, and you review everything before saving. Nothing is saved until you press Save.",
     excelPick: "Choose Excel files", excelRead: "Read the files", excelBadFile: "This is not an organized import sheet (sheet \"Deliveries\" with its columns was not found).",
@@ -22,6 +26,10 @@ export const extra = {
     deletedN: "Deleted", deleteFailedN: "Could not delete",
   },
   zh: {
+    guestTag: "精工制造的塑料薄膜",
+    guestC1T: "现代化生产线", guestC1D: "自动化生产线，稳定产出高品质薄膜。",
+    guestC2T: "按需定制薄膜卷", guestC2D: "颜色、印刷、厚度和宽度均可按客户需求定制。",
+    guestC3T: "严格的质量控制", guestC3D: "每一卷出厂前都经过检验。",
     navImport: "导入", importSub: "将整理好的月度表格导入系统的发货单。",
     excelIntro: "上传整理好的表格（每月一个文件，工作表名为 \"Deliveries\"）。同一张发货单的行会合并，每一行按原样导入（宽×长×卷数，不合并、不取平均），合计会与发货单核对，保存前由您检查。点击保存之前不会写入任何数据。",
     excelPick: "选择 Excel 文件", excelRead: "读取文件", excelBadFile: "这不是整理好的导入表格（找不到包含相应列的 \"Deliveries\" 工作表）。",

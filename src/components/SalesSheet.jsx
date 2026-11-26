@@ -4,7 +4,7 @@ import { useI18n } from "../lib/i18n";
 import { useFeedback } from "./Feedback";
 import { buildSalesRows, exportSalesSheet, exportIntoWorkbook, sheetHead } from "../lib/exportSalesSheet";
 
-const sel = "rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100";
+const sel = "rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-100";
 
 export default function SalesSheet({ list, customers }) {
   const { t, m, lang } = useI18n();
@@ -39,7 +39,7 @@ export default function SalesSheet({ list, customers }) {
         <span className="text-sm text-slate-500">{t("sheetDeliveries")}: <b className="text-slate-800">{count}</b> · {t("sheetRows")}: <b className="text-slate-800">{rows.length}</b></span>
         <div className="ml-auto flex flex-wrap gap-2">
           <button disabled={busy || !rows.length} onClick={() => run(() => exportSalesSheet(list, customers, year, month, lang))}
-            className="flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"><FileSpreadsheet size={16} />{t("downloadSheet")}</button>
+            className="flex items-center gap-2 rounded-xl bg-sky-600 px-4 py-2 text-sm font-medium text-white hover:bg-sky-700 disabled:opacity-50"><FileSpreadsheet size={16} />{t("downloadSheet")}</button>
           <button disabled={busy || !rows.length} onClick={() => file.current?.click()} title={t("fillWorkbookHint")}
             className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"><Upload size={16} />{t("fillWorkbook")}</button>
           <input ref={file} type="file" accept=".xlsx" className="hidden" onChange={(e) => {

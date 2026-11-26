@@ -5,7 +5,7 @@ import { useI18n } from "../lib/i18n";
 import { useFeedback } from "./Feedback";
 import { Spinner } from "./Spinner";
 
-const inp = "w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100";
+const inp = "w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none transition focus:border-sky-500 focus:ring-4 focus:ring-sky-100";
 export default function CustomersManager({ customers, list, canDelete, onChanged }) {
   const { t } = useI18n();
   const { success, error: toastError, confirm } = useFeedback();
@@ -33,19 +33,19 @@ export default function CustomersManager({ customers, list, canDelete, onChanged
     <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4 sm:p-6">
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative min-w-[200px] flex-1"><Search size={16} className="absolute left-3 top-2.5 text-slate-400" /><input className={`${inp} pl-9`} placeholder={t("search")} value={q} onChange={(e) => setQ(e.target.value)} /></div>
-        <button onClick={() => setForm({ nameEn: "", nameZh: "", code: "" })} className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"><Plus size={16} />{t("addCustomer")}</button>
+        <button onClick={() => setForm({ nameEn: "", nameZh: "", code: "" })} className="flex items-center gap-1.5 rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white hover:bg-sky-700"><Plus size={16} />{t("addCustomer")}</button>
       </div>
       {err && <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{err}</div>}
 
       {form && (
-        <form onSubmit={submit} className="grid gap-3 rounded-xl border border-indigo-100 bg-indigo-50/40 p-4 sm:grid-cols-3">
+        <form onSubmit={submit} className="grid gap-3 rounded-xl border border-sky-100 bg-sky-50/40 p-4 sm:grid-cols-3">
           <h3 className="text-sm font-semibold text-slate-800 sm:col-span-3">{form.id ? t("editCustomer") : t("addCustomer")}</h3>
           <label className="block text-xs font-medium text-slate-500">{t("nameEn")}<input required className={`${inp} mt-1`} value={form.nameEn} onChange={set("nameEn")} /></label>
           <label className="block text-xs font-medium text-slate-500">{t("nameZh")}<input className={`${inp} mt-1`} value={form.nameZh} onChange={set("nameZh")} /></label>
           <label className="block text-xs font-medium text-slate-500">{t("code")}<input className={`${inp} mt-1 font-mono uppercase`} value={form.code} onChange={set("code")} placeholder="TBB" /></label>
           <div className="flex justify-end gap-2 sm:col-span-3">
             <button type="button" onClick={() => setForm(null)} className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm text-slate-600 hover:bg-slate-50">{t("cancel")}</button>
-            <button disabled={busy} className="flex min-w-[5.5rem] items-center justify-center rounded-lg bg-indigo-600 px-5 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-60">{busy ? <Spinner size={18} /> : t("save")}</button>
+            <button disabled={busy} className="flex min-w-[5.5rem] items-center justify-center rounded-lg bg-sky-600 px-5 py-2 text-sm font-medium text-white hover:bg-sky-700 disabled:opacity-60">{busy ? <Spinner size={18} /> : t("save")}</button>
           </div>
         </form>
       )}

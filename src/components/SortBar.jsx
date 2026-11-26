@@ -8,7 +8,7 @@ const OPTIONS = [
   ["total:desc", "sort_total_hi"], ["total:asc", "sort_total_lo"], ["sqm:desc", "sort_sqm_hi"], ["sqm:asc", "sort_sqm_lo"],
   ["qty:desc", "sort_qty_hi"], ["qty:asc", "sort_qty_lo"],
 ];
-const sel = "rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100";
+const sel = "rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-100";
 
 export default function SortBar({ sort, onSort, size, onSize, total }) {
   const { t } = useI18n();

@@ -23,7 +23,7 @@ export default function CustomerPicker({ customers, buyer, customerId, onChange,
           {matches.map((c) => (
             <li key={c.id}>
               <button type="button" onMouseDown={(e) => { e.preventDefault(); onChange({ buyer: c.nameEn, customerId: c.id }); setOpen(false); }}
-                className={`flex w-full items-center justify-between gap-3 px-3 py-2 text-start text-sm hover:bg-indigo-50 ${c.id === customerId ? "bg-indigo-50" : ""}`}>
+                className={`flex w-full items-center justify-between gap-3 px-3 py-2 text-start text-sm hover:bg-sky-50 ${c.id === customerId ? "bg-sky-50" : ""}`}>
                 <span className="truncate font-medium text-slate-800">{label(c)}</span>
                 <span className="shrink-0 text-xs text-slate-400">{other(c)}{c.code ? ` · ${c.code}` : ""}</span>
               </button>

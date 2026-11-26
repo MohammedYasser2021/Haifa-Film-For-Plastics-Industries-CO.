@@ -17,7 +17,7 @@ export default function BackupPage({ list, customers }) {
           <div key={title} className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
             <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${tone}`}><Icon size={24} /></div>
             <div className="flex-1"><h3 className="font-semibold text-slate-900">{title}</h3><p className="mt-1 text-sm text-slate-500">{desc}</p></div>
-            <button onClick={run} className="flex items-center justify-center gap-2 rounded-xl bg-indigo-600 py-2.5 text-sm font-medium text-white hover:bg-indigo-700"><Download size={16} />{t("download")}</button>
+            <button onClick={run} className="flex items-center justify-center gap-2 rounded-xl bg-sky-600 py-2.5 text-sm font-medium text-white hover:bg-sky-700"><Download size={16} />{t("download")}</button>
           </div>
         ))}
       </div>

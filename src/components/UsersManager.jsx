@@ -39,8 +39,8 @@ async function call(action, payload = {}) {
 }
 
 const ROLES = ["admin", "editor", "guest"];
-const inp = "w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 disabled:bg-slate-100";
-const badge = { owner: "bg-purple-100 text-purple-700", admin: "bg-indigo-100 text-indigo-700", editor: "bg-sky-100 text-sky-700", guest: "bg-slate-100 text-slate-600" };
+const inp = "w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none transition focus:border-sky-500 focus:ring-4 focus:ring-sky-100 disabled:bg-slate-100";
+const badge = { owner: "bg-purple-100 text-purple-700", admin: "bg-sky-100 text-sky-700", editor: "bg-sky-100 text-sky-700", guest: "bg-slate-100 text-slate-600" };
 
 export default function UsersManager() {
   const { t } = useI18n();
@@ -85,12 +85,12 @@ export default function UsersManager() {
     <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4 sm:p-6">
       <div className="flex items-center justify-between">
         <p className="text-sm text-slate-500">{users.length} {t("users")}</p>
-        <button onClick={() => setForm({ email: "", full_name: "", role: "editor", password: "" })} className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"><UserPlus size={16} />{t("addUser")}</button>
+        <button onClick={() => setForm({ email: "", full_name: "", role: "editor", password: "" })} className="flex items-center gap-1.5 rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white hover:bg-sky-700"><UserPlus size={16} />{t("addUser")}</button>
       </div>
       {err && <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{err}</div>}
 
       {form && (
-        <form onSubmit={submit} className="grid gap-3 rounded-xl border border-indigo-100 bg-indigo-50/40 p-4 sm:grid-cols-2">
+        <form onSubmit={submit} className="grid gap-3 rounded-xl border border-sky-100 bg-sky-50/40 p-4 sm:grid-cols-2">
           <h3 className="text-sm font-semibold text-slate-800 sm:col-span-2">{form.id ? t("editUser") : t("addUser")}</h3>
           <label className="block text-xs font-medium text-slate-500">{t("email")}<input type="email" required disabled={!!form.id} className={`${inp} mt-1`} value={form.email} onChange={set("email")} /></label>
           <label className="block text-xs font-medium text-slate-500">{t("fullName")}<input className={`${inp} mt-1`} value={form.full_name} onChange={set("full_name")} /></label>
@@ -107,7 +107,7 @@ export default function UsersManager() {
           </div>
           <div className="flex justify-end gap-2 sm:col-span-2">
             <button type="button" onClick={() => setForm(null)} className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm text-slate-600 hover:bg-slate-50">{t("cancel")}</button>
-            <button disabled={busy} className="flex min-w-[5.5rem] items-center justify-center rounded-lg bg-indigo-600 px-5 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-60">{busy ? <Spinner size={18} /> : t("save")}</button>
+            <button disabled={busy} className="flex min-w-[5.5rem] items-center justify-center rounded-lg bg-sky-600 px-5 py-2 text-sm font-medium text-white hover:bg-sky-700 disabled:opacity-60">{busy ? <Spinner size={18} /> : t("save")}</button>
           </div>
         </form>
       )}
@@ -118,7 +118,7 @@ export default function UsersManager() {
             <tr>{["fullName", "email", "role", "lastLogin", "actions"].map((k) => <th key={k} className={`px-4 py-3 text-start font-semibold ${k === "lastLogin" ? "hidden sm:table-cell" : ""}`}>{t(k)}</th>)}</tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
-            {loading && <tr><td colSpan={5} className="py-10 text-center"><Spinner size={30} className="mx-auto text-indigo-600" /></td></tr>}
+            {loading && <tr><td colSpan={5} className="py-10 text-center"><Spinner size={30} className="mx-auto text-sky-600" /></td></tr>}
             {users.map((u) => (
               <tr key={u.id} className="hover:bg-slate-50/70">
                 <td className="px-4 py-3 font-medium text-slate-900">{u.full_name || "—"}</td>

@@ -6,7 +6,7 @@ import { periodRows, yearsIn } from "../lib/reports";
 import { exportTable } from "../lib/exportReport";
 import BarChart from "./BarChart";
 
-const sel = "rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100";
+const sel = "rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-100";
 export default function PeriodReport({ list, cur }) {
   const { t, m } = useI18n();
   const years = yearsIn(list);

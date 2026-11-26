@@ -8,7 +8,7 @@ import DeliveryForm from "./DeliveryForm";
 import { saveDelivery } from "../lib/api";
 
 // Review table of the import: shows what was found, lets the person fix a delivery with the normal form, and saves the chosen ones.
-const BADGE = { ok: "bg-emerald-50 text-emerald-700", review: "bg-amber-50 text-amber-700", error: "bg-red-50 text-red-700", dup: "bg-slate-100 text-slate-600", saved: "bg-indigo-50 text-indigo-700" };
+const BADGE = { ok: "bg-emerald-50 text-emerald-700", review: "bg-amber-50 text-amber-700", error: "bg-red-50 text-red-700", dup: "bg-slate-100 text-slate-600", saved: "bg-sky-50 text-sky-700" };
 const fill = (s, args) => args.reduce((x, a, i) => x.replaceAll(`{${i}}`, String(a)), s);
 
 export default function ImportReview({ built, customers, onSaved }) {
@@ -57,7 +57,7 @@ export default function ImportReview({ built, customers, onSaved }) {
         <span className="text-emerald-700">{count((r) => r.status === "ok")} {t("statusOk")}</span>
         <span className="text-amber-700">{count((r) => ["review", "error"].includes(r.status))} {t("statusReview")}</span>
         {count((r) => r.status === "dup") > 0 && <span className="text-slate-500">{count((r) => r.status === "dup")} {t("statusDup")}</span>}
-        <button disabled={saving || !chosen.size} onClick={saveChosen} className="ms-auto flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50">
+        <button disabled={saving || !chosen.size} onClick={saveChosen} className="ms-auto flex items-center gap-2 rounded-xl bg-sky-600 px-4 py-2 text-sm font-medium text-white hover:bg-sky-700 disabled:opacity-50">
           {saving && <Spinner size={14} />}{t("importSaveSel")} ({chosen.size})</button>
       </div>
 

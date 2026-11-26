@@ -33,7 +33,7 @@ export default function ImportPage({ list, customers, onSaved }) {
         <div className="mt-4 flex flex-wrap items-center gap-3">
           <button type="button" disabled={busy} onClick={() => input.current?.click()} className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"><FileSpreadsheet size={16} />{t("excelPick")}</button>
           <input ref={input} type="file" multiple accept=".xlsx" className="hidden" onChange={(e) => { setFiles([...e.target.files]); setBuilt(null); e.target.value = ""; }} />
-          <button type="button" disabled={!files.length || busy} onClick={read} className="flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50">{busy ? <Spinner size={16} /> : <Upload size={16} />}{t("excelRead")}</button>
+          <button type="button" disabled={!files.length || busy} onClick={read} className="flex items-center gap-2 rounded-xl bg-sky-600 px-5 py-2 text-sm font-medium text-white hover:bg-sky-700 disabled:opacity-50">{busy ? <Spinner size={16} /> : <Upload size={16} />}{t("excelRead")}</button>
         </div>
         {files.length > 0 && <p className="mt-3 text-sm text-slate-600">{files.map((f) => f.name).join(" · ")}</p>}
       </section>

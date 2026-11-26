@@ -8,7 +8,7 @@ export default function Stats({ list }) {
   const rows = list.map(totals);
   const byCur = list.reduce((o, d, i) => ((o[d.currency] = (o[d.currency] || 0) + rows[i].total), o), {});
   const cards = [
-    [Package, t("count"), list.length, "bg-indigo-50 text-indigo-600"],
+    [Package, t("count"), list.length, "bg-sky-50 text-sky-600"],
     [Layers, t("qty"), plain(rows.reduce((s, r) => s + r.qty, 0)), "bg-sky-50 text-sky-600"],
     [Ruler, t("sqm"), plain(rows.reduce((s, r) => s + r.sqm, 0)), "bg-amber-50 text-amber-600"],
     [Wallet, t("total"), Object.keys(byCur).length ? Object.entries(byCur).map(([c, v]) => `${money(v)} ${c}`).join(" · ") : "—", "bg-emerald-50 text-emerald-600"],

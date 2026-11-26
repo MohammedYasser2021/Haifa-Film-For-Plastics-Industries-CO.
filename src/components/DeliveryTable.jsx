@@ -28,14 +28,14 @@ export default function DeliveryTable(props) {
   const { t } = useI18n();
   const selectable = !!(selected && onToggle);                       // checkboxes only for people who may delete
   const allOnPage = selectable && list.length > 0 && list.every((d) => selected.has(d.id));
-  const Box = ({ d }) => <input type="checkbox" className="h-4 w-4 cursor-pointer accent-indigo-600" checked={selected.has(d.id)} onChange={() => onToggle(d.id)} aria-label={t("selectedN")} />;
+  const Box = ({ d }) => <input type="checkbox" className="h-4 w-4 cursor-pointer accent-sky-600" checked={selected.has(d.id)} onChange={() => onToggle(d.id)} aria-label={t("selectedN")} />;
   if (!list.length) return <div className="flex flex-col items-center gap-2 p-16 text-slate-400"><Inbox size={40} /><p>{t("empty")}</p></div>;
 
   const Head = ({ k, label: text }) => {
     const active = sort.key === k;
     return (
       <th className="px-5 py-3 text-start text-xs font-semibold uppercase tracking-wide text-slate-500">
-        <button onClick={() => onSort({ key: k, dir: active && sort.dir === "asc" ? "desc" : "asc" })} className={`flex items-center gap-1 uppercase hover:text-slate-900 ${active ? "text-indigo-700" : ""}`}>
+        <button onClick={() => onSort({ key: k, dir: active && sort.dir === "asc" ? "desc" : "asc" })} className={`flex items-center gap-1 uppercase hover:text-slate-900 ${active ? "text-sky-700" : ""}`}>
           {text}{active ? (sort.dir === "asc" ? <ChevronUp size={14} /> : <ChevronDown size={14} />) : <ChevronDown size={14} className="opacity-20" />}
         </button>
       </th>
@@ -49,7 +49,7 @@ export default function DeliveryTable(props) {
         <table className="w-full text-sm">
           <thead className="bg-slate-50/80">
             <tr>
-              {selectable && <th className="w-10 px-3 py-3"><input type="checkbox" className="h-4 w-4 cursor-pointer accent-indigo-600" checked={allOnPage} onChange={() => onTogglePage(list.map((d) => d.id), !allOnPage)} title={t("selectAllPage")} aria-label={t("selectAllPage")} /></th>}
+              {selectable && <th className="w-10 px-3 py-3"><input type="checkbox" className="h-4 w-4 cursor-pointer accent-sky-600" checked={allOnPage} onChange={() => onTogglePage(list.map((d) => d.id), !allOnPage)} title={t("selectAllPage")} aria-label={t("selectAllPage")} /></th>}
               <Head k="buyer" label={t("buyer")} /><Head k="orderNo" label={t("orderNo")} /><Head k="date" label={t("date")} />
               <Head k="qty" label={t("qty")} /><Head k="sqm" label={t("sqm")} /><Head k="total" label={t("total")} />
               <th className="px-5 py-3 text-start text-xs font-semibold uppercase tracking-wide text-slate-500">{t("actions")}</th>
@@ -59,7 +59,7 @@ export default function DeliveryTable(props) {
             {list.map((d) => {
               const T = totals(d);
               return (
-                <tr key={d.id} className={`transition hover:bg-slate-50/70 ${selectable && selected.has(d.id) ? "bg-indigo-50/60" : ""}`}>
+                <tr key={d.id} className={`transition hover:bg-slate-50/70 ${selectable && selected.has(d.id) ? "bg-sky-50/60" : ""}`}>
                   {selectable && <td className="w-10 px-3 py-4"><Box d={d} /></td>}
                   <td className="px-5 py-4 font-medium text-slate-900">{label(d)}</td>
                   <td className="px-5 py-4">{d.orderNo ? <span className="rounded-md bg-slate-100 px-2 py-1 font-mono text-xs text-slate-700">{d.orderNo}</span> : <span className="text-slate-300">—</span>}</td>

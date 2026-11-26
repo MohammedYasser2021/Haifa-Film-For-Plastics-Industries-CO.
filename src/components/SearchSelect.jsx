@@ -23,7 +23,7 @@ export default function SearchSelect({ value, onChange, options, placeholder, cl
   return (
     <div ref={ref} className={`relative ${className}`}>
       <button type="button" onClick={() => { setOpen(!open); setQ(""); }}
-        className="flex w-full items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-start text-sm outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100">
+        className="flex w-full items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-start text-sm outline-none transition focus:border-sky-500 focus:ring-4 focus:ring-sky-100">
         <span className={`truncate ${hasValue ? "text-slate-900" : "text-slate-500"}`}>{hasValue ? selected.label : placeholder}</span>
         <ChevronDown size={16} className={`shrink-0 text-slate-400 transition ${open ? "rotate-180" : ""}`} />
       </button>
@@ -35,7 +35,7 @@ export default function SearchSelect({ value, onChange, options, placeholder, cl
               <div className="relative">
                 <Search size={15} className="absolute start-2.5 top-2.5 text-slate-400" />
                 <input autoFocus value={q} onChange={(e) => setQ(e.target.value)} style={{ paddingInlineStart: 32 }}
-                  className="w-full rounded-lg border border-slate-200 py-2 pe-3 text-sm outline-none focus:border-indigo-500" />
+                  className="w-full rounded-lg border border-slate-200 py-2 pe-3 text-sm outline-none focus:border-sky-500" />
               </div>
             </div>
           )}
@@ -43,9 +43,9 @@ export default function SearchSelect({ value, onChange, options, placeholder, cl
             {list.map((o) => (
               <li key={o.value}>
                 <button type="button" onClick={() => { onChange(o.value); setOpen(false); }}
-                  className={`flex w-full items-center justify-between gap-3 px-3 py-2.5 text-start text-sm hover:bg-indigo-50 ${o.value === value ? "bg-indigo-50 font-medium text-indigo-700" : "text-slate-700"}`}>
+                  className={`flex w-full items-center justify-between gap-3 px-3 py-2.5 text-start text-sm hover:bg-sky-50 ${o.value === value ? "bg-sky-50 font-medium text-sky-700" : "text-slate-700"}`}>
                   <span className="truncate">{o.label}</span>
-                  <span className="flex shrink-0 items-center gap-2 text-xs text-slate-400">{o.sub}{o.value === value && <Check size={15} className="text-indigo-600" />}</span>
+                  <span className="flex shrink-0 items-center gap-2 text-xs text-slate-400">{o.sub}{o.value === value && <Check size={15} className="text-sky-600" />}</span>
                 </button>
               </li>
             ))}

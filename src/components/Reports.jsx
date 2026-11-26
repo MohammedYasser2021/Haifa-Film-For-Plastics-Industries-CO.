@@ -18,7 +18,7 @@ export default function Reports({ list, label, customers = [] }) {
           {[["period", "periodReport"], ["buyers", "buyersReport"], ["sales", "salesSheet"]].map(([k, l]) => <button key={k} onClick={() => setTab(k)} className={`rounded-md px-3 py-1.5 font-medium ${tab === k ? "bg-white shadow-sm" : "text-slate-500"}`}>{t(l)}</button>)}
         </div>
         {currencies.length > 1 && tab !== "sales" && (
-          <select value={cur} onChange={(e) => setCur(e.target.value)} className="ml-auto rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-500">
+          <select value={cur} onChange={(e) => setCur(e.target.value)} className="ml-auto rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-sky-500">
             {currencies.map((x) => <option key={x} value={x}>{t("currency")}: {c(x)}</option>)}
           </select>
         )}

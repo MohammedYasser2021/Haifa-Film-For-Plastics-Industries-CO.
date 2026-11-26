@@ -54,13 +54,13 @@ export function FeedbackProvider({ children }) {
       {dlg && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm" onMouseDown={(e) => e.target === e.currentTarget && answer(false)}>
           <div className="pop-in w-full max-w-sm rounded-2xl bg-white p-6 text-center shadow-2xl">
-            <div className={`mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full ${dlg.danger ? "bg-red-100 text-red-600" : "bg-indigo-100 text-indigo-600"}`}><AlertTriangle size={28} /></div>
+            <div className={`mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full ${dlg.danger ? "bg-red-100 text-red-600" : "bg-sky-100 text-sky-600"}`}><AlertTriangle size={28} /></div>
             <h3 className="text-lg font-semibold text-slate-900">{dlg.title || t("confirmTitle")}</h3>
             {dlg.message && <p className="mt-2 break-words text-sm text-slate-500">{dlg.message}</p>}
             <p className="mt-1 text-xs text-slate-400">{t("confirmHint")}</p>
             <div className="mt-6 flex gap-3">
               <button onClick={() => answer(false)} className="flex-1 rounded-xl border border-slate-200 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50">{t("cancel")}</button>
-              <button autoFocus onClick={() => answer(true)} className={`flex-1 rounded-xl py-2.5 text-sm font-medium text-white ${dlg.danger ? "bg-red-600 hover:bg-red-700" : "bg-indigo-600 hover:bg-indigo-700"}`}>{dlg.confirmText || t("save")}</button>
+              <button autoFocus onClick={() => answer(true)} className={`flex-1 rounded-xl py-2.5 text-sm font-medium text-white ${dlg.danger ? "bg-red-600 hover:bg-red-700" : "bg-sky-600 hover:bg-sky-700"}`}>{dlg.confirmText || t("save")}</button>
             </div>
           </div>
         </div>

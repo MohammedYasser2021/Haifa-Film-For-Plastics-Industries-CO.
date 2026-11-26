@@ -6,7 +6,7 @@ import { Spinner } from "./Spinner";
 import { COLORS, LOGOS, VISCOSITY_OPTIONS, CURRENCIES, SUPPLIER, emptyItem, itemSqm, itemTotal, totals, plain, money, num, logoBase, isOther, otherLabel } from "../lib/utils";
 import { parseQuickLines } from "../lib/checks";
 
-const base = "w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition placeholder:text-slate-300 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100";
+const base = "w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition placeholder:text-slate-300 focus:border-sky-500 focus:ring-4 focus:ring-sky-100";
 
 // NOTE: these are defined OUTSIDE the form component so they keep their identity between renders (fixes the focus-loss bug)
 function Field({ label, children, className = "" }) {
@@ -139,14 +139,14 @@ export default function DeliveryForm({ initial, onSave, onCancel, customers = []
           </div>
         </section>
 
-        <section className="rounded-xl border border-dashed border-indigo-200 bg-indigo-50/40 p-4">
-          <h3 className="mb-1 flex items-center gap-2 text-sm font-semibold text-indigo-800"><Zap size={15} />{t("quickTitle")}</h3>
+        <section className="rounded-xl border border-dashed border-sky-200 bg-sky-50/40 p-4">
+          <h3 className="mb-1 flex items-center gap-2 text-sm font-semibold text-sky-800"><Zap size={15} />{t("quickTitle")}</h3>
           <p className="mb-2 text-xs text-slate-500">{t("quickHint")}</p>
           <div className="flex items-start gap-2">
             <textarea rows={2} className={`${base} font-mono`} value={quick} placeholder={t("quickPlaceholder")}
               onChange={(e) => setQuick(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); addQuick(); } }} />
-            <button type="button" onClick={addQuick} className="shrink-0 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">{t("quickAdd")}</button>
+            <button type="button" onClick={addQuick} className="shrink-0 rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white hover:bg-sky-700">{t("quickAdd")}</button>
           </div>
           {quickBad.length > 0 && <p className="mt-2 text-xs text-red-600">{t("quickBad")}: {quickBad.join(" | ")}</p>}
         </section>
@@ -154,7 +154,7 @@ export default function DeliveryForm({ initial, onSave, onCancel, customers = []
         <section className="space-y-3">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-semibold text-slate-700">{t("rows")}</h3>
-            <button onClick={addItem} className="flex items-center gap-1 rounded-lg bg-indigo-50 px-3 py-1.5 text-sm font-medium text-indigo-700 transition hover:bg-indigo-100"><Plus size={16} />{t("addRow")}</button>
+            <button onClick={addItem} className="flex items-center gap-1 rounded-lg bg-sky-50 px-3 py-1.5 text-sm font-medium text-sky-700 transition hover:bg-sky-100"><Plus size={16} />{t("addRow")}</button>
           </div>
           {d.items.map((i, idx) => (
             <div key={i.id} data-item={i.id} className="rounded-xl border border-slate-200 bg-white p-4">
@@ -195,7 +195,7 @@ export default function DeliveryForm({ initial, onSave, onCancel, customers = []
         <div className="flex items-center gap-2">
           {err && <span className="mr-2 text-sm text-red-600">{t("required")}</span>}
           <button onClick={onCancel} className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50">{t("cancel")}</button>
-          <button onClick={submit} disabled={busy} className="flex min-w-[5.5rem] items-center justify-center rounded-lg bg-indigo-600 px-5 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 disabled:opacity-70">{busy ? <Spinner size={18} /> : t("save")}</button>
+          <button onClick={submit} disabled={busy} className="flex min-w-[5.5rem] items-center justify-center rounded-lg bg-sky-600 px-5 py-2 text-sm font-medium text-white shadow-sm hover:bg-sky-700 disabled:opacity-70">{busy ? <Spinner size={18} /> : t("save")}</button>
         </div>
       </div>
     </>
